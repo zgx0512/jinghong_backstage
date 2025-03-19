@@ -124,7 +124,11 @@ export default ({ mode }) => {
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `@use "~/assets/css/variables.scss" as *;`
+          additionalData: `@use "~/assets/css/variables.scss" as *;`,
+          sassOptions: {
+            outputStyle: 'expanded',
+            charset: false
+          }
         }
       }
     }
