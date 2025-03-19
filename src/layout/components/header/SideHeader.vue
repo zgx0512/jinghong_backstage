@@ -10,7 +10,7 @@
   <div
     class="flex flex-col items-center justify-between header backdrop-blur-sm bg-white/75 dark:bg-black/75"
   >
-    <div class="text-lg text-center vertical">淘品汇后台管理系统</div>
+    <div class="text-lg text-center vertical">鲸鸿后台管理系统</div>
 
     <div class="flex flex-col items-center justify-center">
       <!-- 用户名下拉菜单 -->

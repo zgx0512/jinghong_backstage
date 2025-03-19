@@ -42,5 +42,5 @@ router.beforeEach(async (to, from, next) => {
 })
 
 router.afterEach((to) => {
-  document.title = `${to.meta.title} | 淘品汇后台管理系统`
+  document.title = `${to.meta.title} | 鲸鸿后台管理系统`
 })

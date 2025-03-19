@@ -68,5 +68,5 @@ app.config.warnHandler = (msg, instance, trace) => {
 
 app.config.globalProperties.$globalMsg = 'hello'
 
-app.provide('$globalName', '淘品汇后台管理系统')
+app.provide('$globalName', '鲸鸿后台管理系统')
 app.mount('#app')
