@@ -71,7 +71,7 @@
         v-model:current-page="page"
         v-model:page-size="limit"
         :page-sizes="[3, 5, 10, 20]"
-        :small="true"
+        size="small"
         :background="true"
         layout="prev, pager, next, jumper, ->, sizes, total"
         :total="total"

@@ -23,6 +23,7 @@ export default ({ mode }) => {
   return defineConfig({
     base: './',
     server: {
+      host: '0.0.0.0',
       port: 9527,
       proxy: {
         '/api': {
@@ -68,14 +69,15 @@ export default ({ mode }) => {
       Components({
         resolvers: [
           // Auto register icon components
-          // 自动注册图标组件
+          // // 自动注册图标组件
           IconsResolver({
-            enabledCollections: ['ep']
+            enabledCollections: ['ep'],
           }),
           ElementPlusResolver({
             importStyle: mode === 'development' ? false : 'sass'
           })
-        ]
+        ],
+        exclude: [/^IEp[A-Z]/]  // 添加这行来排除所有 IEp 开头的图标组件
       }),
 
       Icons({

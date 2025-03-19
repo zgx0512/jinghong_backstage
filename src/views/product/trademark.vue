@@ -43,7 +43,7 @@
         v-model:current-page="page"
         v-model:page-size="limit"
         :page-sizes="[3, 5, 10, 20]"
-        :small="true"
+        size="small"
         :background="true"
         layout="prev, pager, next, jumper, ->, sizes, total"
         :total="total"
@@ -64,6 +64,7 @@ import { reqTrademarkInfo, reqRemoveTm } from '~/api/product/trademark'
 import type { tmResponseType } from '~/api/product/trademark/type'
 // 引入子组件
 import addOrUpdateTm from './components/addOrUpdateTm.vue'
+import { ElMessage } from 'element-plus'
 // 品牌列表
 const tmList = ref<tmResponseType[]>([])
 // 当前页
