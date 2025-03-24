@@ -2,11 +2,11 @@ import request from '~/utils/http/axios'
 import type { roleInfoResponseType, roleResponseType, permissionVoReponseType } from './type'
 import type { permissionInfoResponseType } from '../permission/type'
 enum API {
-  ROLEINFO_URL = '/admin/acl/role/',
-  BATCHREMOVEROLE_URL = '/admin/acl/role/batchRemove',
-  REMOVE_URL = '/admin/acl/role/remove/',
-  ADDROLE_URL = '/admin/acl/role/save',
-  UPDATEROLE_URL = '/admin/acl/role/update',
+  ROLEINFO_URL = '/getRoleList',
+  BATCHREMOVEROLE_URL = '/batchDeleteRole',
+  REMOVE_URL = '/deleteRole/',
+  ADDROLE_URL = '/addRole',
+  UPDATEROLE_URL = '/updateRole',
   PERMISSONINFO_URL = '/admin/acl/permission/toAssign/',
   ASSIGNACL_URL = '/admin/acl/permission/doAssignAcl'
 }
@@ -14,7 +14,7 @@ enum API {
 // 获取角色列表的接口
 export const reqRoleInfo = (page: number, limit: number, roleName: string) => {
   return request.get<roleInfoResponseType, any>(
-    `${API.ROLEINFO_URL}${page}/${limit}?roleName=${roleName}`
+    `${API.ROLEINFO_URL}?page=${page}&limit=${limit}&roleName=${roleName}`
   )
 }
 
@@ -33,7 +33,7 @@ export const reqRemoveRole = (id: number) => {
 
 // 添加|修改角色的接口
 export const reqAddOrUpdateRole = (data: roleResponseType) => {
-  if (data.id !== -1) {
+  if (data.id) {
     // 有id，是修改角色
     return request({
       method: 'put',

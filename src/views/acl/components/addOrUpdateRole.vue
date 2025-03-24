@@ -45,7 +45,7 @@ const emits = defineEmits(['cancelAddOrUpdate', 'submitAddOrUpdate', 'getRoleInf
 const roleFormRef = ref()
 // 表单绑定对象
 const roleForm = ref<roleResponseType>({
-  id: -1,
+  id: '',
   roleName: ''
 })
 const title = ref<string>('添加角色')
@@ -70,24 +70,32 @@ const submit = () => {
       loading.value = true
       try {
         // 发送请求，添加|修改角色
-        await reqAddOrUpdateRole(roleForm.value)
-        // 成功，提示用户
-        ElMessage({
-          type: 'success',
-          message: '保存成功'
-        })
-        // 关闭对话框
-        emits('submitAddOrUpdate')
-        // 关闭加载效果
-        loading.value = false
-        // 重新获取用户列表数据
-        emits('getRoleInfo', roleForm.value.id)
+        const res: any = await reqAddOrUpdateRole(roleForm.value)
+        if (res.code === 200) {
+          // 成功，提示用户
+          ElMessage({
+            type: 'success',
+            message: '保存成功'
+          })
+          // 关闭对话框
+          emits('submitAddOrUpdate')
+          // 关闭加载效果
+          loading.value = false
+          // 重新获取用户列表数据
+          emits('getRoleInfo', roleForm.value.id)
+        } else {
+          ElMessage({
+            type: 'error',
+            message: res.message || '保存失败'
+          })
+        }
       } catch (error) {
         // 失败的提示信息
         ElMessage({
           type: 'error',
           message: '保存失败'
         })
+      } finally {
         // 关闭加载效果
         loading.value = false
       }

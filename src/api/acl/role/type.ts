@@ -7,7 +7,7 @@ interface responseType {
 
 // 每个角色的ts类型
 export interface roleResponseType {
-    id?: number
+    id?: number | string
     createTime?: string
     updateTime?: string
     roleName: string

@@ -19,7 +19,7 @@
       <el-button
         icon="Plus"
         type="primary"
-        @click="openDialog({ id: -1, roleName: '' }, '添加角色')"
+        @click="openDialog({ id: '', roleName: '' }, '添加角色')"
         >添加角色</el-button
       >
       <el-button icon="Delete" type="danger" :disabled="idList.length === 0" @click="batchRemove"
@@ -103,6 +103,7 @@ import addOrUpdateRole from './components/addOrUpdateRole.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { roleResponseType } from '~/api/acl/role/type'
 import type { permissionResponseType } from '~/api/acl/permission/type'
+import dayjs from 'dayjs'
 // 表格的基础属性
 const tableProp = {
   isSelect: true,
@@ -117,18 +118,15 @@ const tableHeadList = [
   },
   {
     label: '角色名称',
-    property: 'roleName',
-    width: '120'
+    property: 'roleName'
   },
   {
     label: '创建时间',
-    property: 'createTime',
-    width: '180'
+    property: 'createTime'
   },
   {
     label: '更新时间',
-    property: 'updateTime',
-    width: '180'
+    property: 'updateTime'
   },
   {
     label: '操作'
@@ -169,7 +167,13 @@ const getRoleInfo = async () => {
   loading.value = true
   const result = await reqRoleInfo(page.value, limit.value, roleName.value)
   if (result.code === 200) {
-    tableData.value = result.data.records
+    tableData.value = result.data.rolesList.map((role: roleResponseType) => {
+      return {
+        ...role,
+        createTime: dayjs(role.createTime).format('YYYY-MM-DD HH:mm:ss'),
+        updateTime: dayjs(role.createTime).format('YYYY-MM-DD HH:mm:ss')
+      }
+    })
     total.value = result.data.total
     loading.value = false
   } else {
@@ -207,19 +211,26 @@ const batchRemove = () => {
     .then(async () => {
       try {
         // 发送批量删除角色的请求
-        await reqBatchRemoveRole(idList.value)
-        ElMessage({
-          type: 'success',
-          message: '删除成功'
-        })
-        // 回到第一页
-        page.value = 1
-        // 重新获取角色列表
-        getRoleInfo()
+        const res: any = await reqBatchRemoveRole(idList.value)
+        if (res.code === 200) {
+          ElMessage({
+            type: 'success',
+            message: '批量删除成功'
+          })
+          // 回到第一页
+          page.value = 1
+          // 重新获取角色列表
+          getRoleInfo()
+        } else {
+          ElMessage({
+            type: 'error',
+            message: res.message || '批量删除失败'
+          })
+        }
       } catch (error) {
         ElMessage({
           type: 'error',
-          message: '删除失败'
+          message: '批量删除失败'
         })
       }
     })
@@ -234,7 +245,15 @@ const batchRemove = () => {
 const remove = async (id: number) => {
   try {
     // 调用删除角色的接口
-    await reqRemoveRole(id)
+    const res: any = await reqRemoveRole(id)
+    if (res.code !== 200) {
+      // 失败的提示信息
+      ElMessage({
+        type: 'error',
+        message: res.message || '删除失败'
+      })
+      return
+    }
     // 成功，提示用户
     ElMessage({
       type: 'success',
@@ -263,8 +282,8 @@ const openDialog = (row: roleResponseType, title: string) => {
   addOrUpdateRoleRef.value.open(JSON.parse(JSON.stringify(row)), title)
 }
 // 重新获取用户列表数据
-const reloadRoleInfo = (id: number) => {
-  if (id === -1) {
+const reloadRoleInfo = (id: number | string) => {
+  if (!id) {
     // 是新增，回到第一页
     page.value = 1
   }
@@ -321,7 +340,7 @@ const submit = async () => {
   ]
   // 发送请求，分配权限
   try {
-    await reqAssignAcl({permissionIdList, roleId: roleId.value as number})
+    await reqAssignAcl({ permissionIdList, roleId: roleId.value as number })
     // 成功提示信息
     ElMessage({
       type: 'success',

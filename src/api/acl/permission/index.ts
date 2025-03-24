@@ -2,7 +2,7 @@ import request from '~/utils/http/axios'
 // 接口ts类型文件
 import type { permissionResponseType, permissionInfoResponseType, removeResponseType } from './type'
 enum API {
-  PERMISSONINFO_URL = '/admin/acl/permission',
+  MENULIST_URL = '/getMenuList',
   REMOVE_URL = '/admin/acl/permission/remove/',
   ADDPERMISSION_URL = '/admin/acl/permission/save',
   UPDATEPERMISSION_URL = '/admin/acl/permission/update'
@@ -10,7 +10,7 @@ enum API {
 
 // 获取菜单数据的接口
 export const reqPermissionInfo = () => {
-  return request.get<permissionInfoResponseType, any>(API.PERMISSONINFO_URL)
+  return request.get<permissionInfoResponseType, any>(API.MENULIST_URL)
 }
 
 // 递归删除菜单的接口
