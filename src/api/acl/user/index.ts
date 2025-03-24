@@ -9,19 +9,19 @@ import type {
 } from './type'
 
 enum API {
-  USERINFO_URL = '/admin/acl/user/',
-  BATCHREMOVEUSER_URL = '/admin/acl/user/batchRemove',
-  REMOVEUSER_URL = '/admin/acl/user/remove/',
-  ADDUSER_URL = '/admin/acl/user/save',
-  UPDATEUSER_URL = '/admin/acl/user/update',
+  USERINFO_URL = '/getUserList',
+  BATCHREMOVEUSER_URL = '/batchDeleteUser',
+  REMOVEUSER_URL = '/deleteUser',
+  ADDUSER_URL = '/addUser',
+  UPDATEUSER_URL = '/updateUser',
   GETROLEINFO_URL = '/admin/acl/user/toAssign/',
   ASSIGNROLE_URL = '/admin/acl/user/doAssignRole'
 }
 
 // 获取用户数据的接口
-export const reqUserInfo = (page: number, limit: number, username: string = '') => {
+export const reqUserInfo = (page: number, limit: number, username: string) => {
   return request.get<userInfoResponseType, any>(
-    `${API.USERINFO_URL}${page}/${limit}?username=${username}`
+    `${API.USERINFO_URL}?page=${page}&pageSize=${limit}&username=${username}`
   )
 }
 
@@ -36,12 +36,12 @@ export const reqBatchRemoveUser = (idList: number[]) => {
 
 // 根据id删除单个用户的接口
 export const reqRemoveUser = (id: number) => {
-  return request.delete<any, any>(API.REMOVEUSER_URL + id)
+  return request.delete<any, any>(API.REMOVEUSER_URL + '/' + id)
 }
 
 // 添加|编辑用户的接口
 export const reqAddOrUpdateUser = (user: userResponseType) => {
-  if (user.id) {
+  if (user.userId) {
     // 是编辑
     return request.put<addOrUpdateUserResponseType, any>(API.UPDATEUSER_URL, user)
   } else {

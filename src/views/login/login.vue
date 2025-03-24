@@ -13,13 +13,13 @@
           label-position="top"
           size="large"
         >
-          <el-form-item prop="username" label="用户名">
-            <el-input v-model="param.username" placeholder="username"> </el-input>
+          <el-form-item prop="email" label="邮箱">
+            <el-input v-model="param.email" placeholder="请输入邮箱"> </el-input>
           </el-form-item>
           <el-form-item prop="password" label="密码">
             <el-input
               type="password"
-              placeholder="password"
+              placeholder="请输入密码"
               v-model="param.password"
               @keyup.enter="submitForm(login)"
             >
@@ -44,19 +44,20 @@ import { useRouter } from 'vue-router'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { UserInfo } from '~/types/index'
+import { emailValidatePass } from '~/utils/validate'
 
 const router = useRouter()
 const param: UserInfo = reactive({
-  username: 'admin',
-  password: '111111'
+  email: '2324461523@qq.com',
+  password: 'A123456'
 })
 // 登录按钮加载效果
 const loading = ref<boolean>(false)
 const rules: FormRules = {
-  username: [
+  email: [
     {
       required: true,
-      message: '请输入用户名',
+      validator: emailValidatePass,
       trigger: 'blur'
     }
   ],
@@ -70,19 +71,19 @@ const submitForm = (formEl: FormInstance | undefined) => {
   formEl.validate(async (valid: boolean) => {
     if (valid) {
       loading.value = true
-      const result = await userStore.userLogin(param)
-      if (result) {
+      const result = await userStore.userLogin(param);
+      if (result.bool) {
         ElMessage({
           type: 'success',
           message: '登录成功'
         })
         loading.value = false
         router.push('/')
-        userStore.getUserInfo()
+        // userStore.getUserInfo()
       } else {
         ElMessage({
           type: 'error',
-          message: '登录失败'
+          message: result.message || "登录失败"
 
         })
         loading.value = false

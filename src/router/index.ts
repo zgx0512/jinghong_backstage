@@ -107,7 +107,7 @@ let routes = constantRoutes
 
 // 前端固定路由模式
 if (import.meta.env.VITE_PERMISSION_MODE === 'CONSTANT') {
-  routes = [...constantRoutes, ...lastRoutes]
+  routes = [...constantRoutes, ...lastRoutes, ...routeModuleList]
 }
 
 const router = createRouter({

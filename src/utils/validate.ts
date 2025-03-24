@@ -6,6 +6,19 @@ import { reqTmList } from '~/api/product/trademark'
 // 引入ts类型
 import { tmResponseType } from '~/api/product/trademark/type'
 import { ref } from 'vue'
+
+// 邮箱校验规则
+export const emailValidatePass = (rule: any, value: string, callback: any) => {
+  const emailRegex = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
+  if (!value) {
+    callback(new Error('请输入邮箱'))
+  } else if (!emailRegex.test(value)) {
+    callback(new Error('请输入正确的邮箱格式'))
+  } else {
+    callback()
+  }
+}
+
 // 角色名称校验规则
 export const roleNameValidatePass = (rule: any, value: any, callback: any) => {
   const reg = /^(?!\d+$)[\u4e00-\u9fa5\w]+$/

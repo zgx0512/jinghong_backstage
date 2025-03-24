@@ -21,7 +21,8 @@ request.interceptors.request.use((config) => {
   nprogress.start()
   config.headers = config.headers || {}
   if (getToken()) {
-    config.headers.token = getToken() as string
+    // config.headers.token = getToken() as string
+    config.headers.Authorization = `Bearer ${getToken()}` as string
   }
   return config
 })

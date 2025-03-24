@@ -7,14 +7,15 @@ interface responseType {
 
 // 每个用户的ts类型
 export interface userResponseType {
-  id: number | string
+  userId: number | string
   createTime?: string
   updateTime?: string
   username: string
   password?: string
   name?: string
   phone?: string | null
-  roleName?: string
+  role?: string[],
+  email?: string | null
 }
 // 获取用户数据接口返回值的ts类型
 export interface userInfoResponseType extends responseType {

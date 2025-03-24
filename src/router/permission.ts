@@ -13,10 +13,8 @@ router.beforeEach(async (to, from, next) => {
     if (to.path === '/login') {
       next('/')
     } else {
-      if (
-        userStore.asyncRoutes.length < 0 ||
-        (userInfo.avatar === '' && userInfo.username === '')
-      ) {
+      // userStore.asyncRoutes.length < 0 ||
+      if (userInfo.avatar === '' && userInfo.username === '') {
         // 头像跟名称为空，重新发送获取用户信息的请求
         try {
           await getUserInfo()
@@ -24,6 +22,7 @@ router.beforeEach(async (to, from, next) => {
         } catch (error) {
           // token失效了，直接退出登录
           userLogout()
+          next('/login')
         }
       } else {
         next()

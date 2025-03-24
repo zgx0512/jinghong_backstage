@@ -1,9 +1,9 @@
 import request from '~/utils/http/axios'
 
 enum API {
-  LOGIN_URL = '/admin/acl/index/login',
-  USERINFO_URL = '/admin/acl/index/info',
-  LOGOUT_URL = '/admin/acl/index/logout'
+  LOGIN_URL = '/login',
+  USERINFO_URL = '/getUserInfo',
+  LOGOUT_URL = '/logout'
 }
 
 // 登录接口

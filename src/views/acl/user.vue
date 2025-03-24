@@ -18,13 +18,8 @@
     </el-card>
     <!-- 展示用户数据卡片 -->
     <el-card>
-      <el-button
-        type="primary"
-        icon="Plus"
-        @click="openAddOrUpdateDrawer"
-        v-if="permissionBtn('btn.User.add')"
-        >添加用户</el-button
-      >
+      <!--  v-if="permissionBtn('btn.User.add')" -->
+      <el-button type="primary" icon="Plus" @click="openAddOrUpdateDrawer">添加用户</el-button>
       <el-button type="danger" icon="Delete" :disabled="idList.length === 0" @click="batchRemove"
         >批量删除</el-button
       >
@@ -45,7 +40,7 @@
           <el-popconfirm
             :title="`确定删除${row.username}?`"
             width="200"
-            @confirm="removeUser(row.id)"
+            @confirm="removeUser(row.userId)"
           >
             <template #reference>
               <el-button type="danger" icon="Delete" size="small">删除</el-button>
@@ -111,6 +106,7 @@ import {
 import { ElMessageBox } from 'element-plus'
 // 引入子组件
 import addOrUpdateUser from './components/addOrUpdateUser.vue'
+import dayjs from 'dayjs'
 // 引入ts类型
 import { userResponseType, roleResponseType } from '~/api/acl/user/type'
 // 引入按钮权限函数
@@ -121,37 +117,37 @@ const tableData = ref<userResponseType[]>([])
 const tableHeadList = [
   {
     label: 'ID',
-    property: 'id',
+    property: 'userId',
     width: '80'
   },
   {
-    label: '用户名字',
+    label: '用户名称',
     property: 'username',
-    width: '120'
+    width: '200'
   },
   {
-    label: '用户名称',
-    property: 'name',
-    width: '120'
+    label: '邮箱',
+    property: 'email',
+    width: '200'
   },
   {
     label: '用户角色',
     property: 'roleName',
-    width: '120'
+    minWidth: '120'
   },
   {
     label: '创建时间',
     property: 'createTime',
-    width: '180'
+    width: '200'
   },
   {
     label: '更新时间',
     property: 'updateTime',
-    width: '180'
+    width: '200'
   },
   {
     label: '操作',
-    width: '300'
+    minWidth: '300'
   }
 ]
 // 表格基本布局
@@ -178,7 +174,15 @@ const getUserInfo = async () => {
     loading.value = false
     // 赋值
     total.value = result.data.total
-    tableData.value = result.data.records
+    tableData.value = result.data.usersList.map((item: userResponseType) => {
+      return {
+        ...item,
+        id: item.userId,
+        roleName: item.role!.join(','),
+        createTime: dayjs(item.createTime).format('YYYY-MM-DD HH:mm:ss'),
+        updateTime: dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')
+      }
+    })
   }
 }
 onMounted(() => {
@@ -210,10 +214,10 @@ const batchRemove = async () => {
     .then(async () => {
       try {
         // 发送批量删除角色的请求
-        await reqBatchRemoveUser(idList.value)
+        const res = await reqBatchRemoveUser(idList.value)
         ElMessage({
           type: 'success',
-          message: '删除成功'
+          message: '批量删除成功'
         })
         // 回到第一页
         page.value = 1
@@ -222,7 +226,7 @@ const batchRemove = async () => {
       } catch (error) {
         ElMessage({
           type: 'error',
-          message: '删除失败'
+          message: '批量删除失败'
         })
       }
     })
@@ -237,19 +241,27 @@ const batchRemove = async () => {
 const removeUser = async (id: number) => {
   try {
     // 调用删除角色的接口
-    await reqRemoveUser(id)
-    // 成功，提示用户
-    ElMessage({
-      type: 'success',
-      message: '删除成功'
-    })
-    // 判断删除的角色是否是当前页的最后一个
-    if (tableData.value.length <= 1 && page.value > 1) {
-      // 前往上一页
-      page.value = page.value - 1
+    const res = await reqRemoveUser(id)
+    if (res.code === 200) {
+      // 成功，提示用户
+      ElMessage({
+        type: 'success',
+        message: '删除成功'
+      })
+      // 判断删除的角色是否是当前页的最后一个
+      if (tableData.value.length <= 1 && page.value > 1) {
+        // 前往上一页
+        page.value = page.value - 1
+      }
+      // 重新获取角色列表数据
+      getUserInfo()
+    } else {
+      // 失败，提示用户
+      ElMessage({
+        type: 'error',
+        message: res.message
+      })
     }
-    // 重新获取角色列表数据
-    getUserInfo()
   } catch (error) {
     // 失败的提示信息
     ElMessage({
@@ -293,9 +305,9 @@ const openAssignDrawer = async (row: userResponseType) => {
   assignRoleDrawer.value = true
   // 赋值
   name.value = row.username
-  userId.value = row.id
+  userId.value = row.userId
   // 发送请求
-  const result = await reqRoleInfo(row.id)
+  const result = await reqRoleInfo(row.userId)
   if (result.code === 200) {
     allRoles.value = result.data.allRolesList
     checkedRoles.value = result.data.assignRoles.map((item: roleResponseType) => item.id)

@@ -29,7 +29,7 @@ export const useUserStore = defineStore('userStore', () => {
   // 用户登录
   async function userLogin(param: UserInfo) {
     const res: any = await login({
-      username: param.username,
+      email: param.email,
       password: param.password
     })
     if (res.code === 200) {
@@ -37,9 +37,15 @@ export const useUserStore = defineStore('userStore', () => {
       // 将token存储起来
       token.value = res.data
       setToken(res.data)
-      return true
+      return {
+        bool: true,
+        message: '登录成功'
+      }
     }
-    return false
+    return {
+      bool: false,
+      message: res.message
+    }
   }
   // 递归函数 --- 获取用户所拥有的菜单权限
   const getAsyncRoutes = (routesList: RouteRecordRaw[], routes: string[]) => {
@@ -64,17 +70,17 @@ export const useUserStore = defineStore('userStore', () => {
     if (result.code === 200) {
       // 请求成功
       userInfo.value.avatar = result.data.avatar
-      userInfo.value.username = result.data.name
+      userInfo.value.username = result.data.username
       userInfo.value.buttons = result.data.buttons
       // 每次进来，都将routes复原回只有同步路由跟404路由
-      router.options.routes = [...constantRoutes, ...lastRoutes]
-      asyncRoutes = getAsyncRoutes(routeModuleList, result.data.routes)
-      asyncRoutes.forEach((routes) => {
-        router.addRoute(routes)
-        if (!router.options.routes.some((item) => item.name === routes.name)) {
-          router.options.routes = router.options.routes.concat(routes)
-        }
-      })
+      // router.options.routes = [...constantRoutes, ...lastRoutes]
+      // asyncRoutes = getAsyncRoutes(routeModuleList, result.data.routes)
+      // asyncRoutes.forEach((routes) => {
+      //   router.addRoute(routes)
+      //   if (!router.options.routes.some((item) => item.name === routes.name)) {
+      //     router.options.routes = router.options.routes.concat(routes)
+      //   }
+      // })
       return 'ok'
     }
     return Promise.reject(new Error(''))
