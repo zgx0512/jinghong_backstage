@@ -4,7 +4,7 @@ import type { permissionResponseType, permissionInfoResponseType, removeResponse
 enum API {
   MENULIST_URL = '/getMenuList',
   REMOVE_URL = '/admin/acl/permission/remove/',
-  ADDPERMISSION_URL = '/admin/acl/permission/save',
+  ADDPERMISSION_URL = '/addMenu',
   UPDATEPERMISSION_URL = '/admin/acl/permission/update'
 }
 

@@ -9,15 +9,17 @@ export interface permissionResponseType {
   id?: number | string
   createTime?: string
   updateTime?: string
-  pid?: string | number
-  name?: string
-  code?: string | null
+  parentId?: string | number
+  menuName?: string
+  menuPath?: string | null
   toCode?: string | null
   type?: number
   status?: string | null
   level: number
   children?: permissionResponseType[]
   select?: boolean
+  menuIcon: string,
+  acl: string,
 }
 // 获取菜单数据的接口的返回值的ts类型
 export interface permissionInfoResponseType extends responseType {

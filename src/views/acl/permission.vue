@@ -9,10 +9,11 @@
       v-loading="loading"
     >
       <el-table-column prop="menuName" label="菜单名称" />
-      <el-table-column prop="menuPath" label="菜单路径" />
+      <el-table-column prop="menuPath" label="菜单路径" min-width="110px" />
       <el-table-column prop="menuIcon" label="菜单图标" />
-      <el-table-column prop="createTime" label="创建时间" align="center" />
-      <el-table-column prop="updateTime" label="更新时间" align="center" />
+      <el-table-column prop="acl" label="权限值"></el-table-column>
+      <el-table-column prop="createTime" label="创建时间" min-width="110px" align="center" />
+      <el-table-column prop="updateTime" label="更新时间" min-width="110px" align="center" />
       <el-table-column label="操作" align="center" minWidth="150px">
         <template #default="{ row }">
           <el-button
@@ -46,19 +47,25 @@
       </el-table-column>
     </el-table>
     <!-- 添加|修改菜单对话框 -->
-    <el-dialog v-model="dialogVisible" :title="title" width="50%">
+    <el-dialog v-model="dialogVisible" :title="title" width="50%" :close-on-click-modal="false">
       <el-form label-width="80" :rules="rules" :model="permissionForm" ref="permissionFormRef">
-        <el-form-item label="名称" prop="name">
-          <el-input placeholder="请输入菜单名称" v-model="permissionForm.name"></el-input>
+        <el-form-item label="菜单名称" prop="menuName">
+          <el-input placeholder="请输入菜单名称" v-model="permissionForm.menuName"></el-input>
         </el-form-item>
-        <el-form-item label="权限值" prop="code">
-          <el-input placeholder="请输入权限值" v-model="permissionForm.code"></el-input>
+        <el-form-item label="菜单路径" prop="menuPath">
+          <el-input placeholder="请输入菜单路径" v-model="permissionForm.menuPath"></el-input>
+        </el-form-item>
+        <el-form-item label="菜单图标" prop="menuIcon">
+          <IconSelect style="width: 100%" v-model="permissionForm.menuIcon" />
+        </el-form-item>
+        <el-form-item label="权限值" prop="acl">
+          <IconSelect style="width: 100%" v-model="permissionForm.acl" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submit" :loadind="submitLoading"> 确认 </el-button>
+          <el-button type="primary" @click="submit" :loading="submitLoading">确 定</el-button>
         </span>
       </template>
     </el-dialog>
@@ -68,6 +75,7 @@
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus'
 import { ref, onMounted, nextTick } from 'vue'
+import IconSelect from '~/components/IconSelect.vue'
 // 引入接口函数
 import {
   reqPermissionInfo,
@@ -89,15 +97,19 @@ const permissionFormRef = ref()
 // 添加|修改菜单表单对象
 const permissionForm = ref<permissionResponseType>({
   id: '',
-  name: '',
-  code: '',
+  menuName: '',
+  menuPath: '',
   level: 0,
-  pid: ''
+  parentId: '',
+  menuIcon: '',
+  acl: ''
 })
 // 添加|修改菜单表单校验规则
 const rules = ref({
-  name: { required: true, message: '菜单名称不能为空！', trigger: 'blur' },
-  code: { required: true, message: '权限值不能为空！', trigger: 'blur' }
+  menuName: { required: true, message: '菜单名称不能为空！', trigger: 'blur' },
+  acl: { required: true, message: '权限值不能为空！', trigger: 'blur' },
+  menuIcon: { required: true, message: '菜单图标不能为空！', trigger: 'blur' },
+  menuPath: { required: true, message: '菜单路径不能为空！', trigger: 'blur' }
 })
 // 获取菜单数据的函数
 const getPermissionInfo = async () => {
@@ -137,10 +149,12 @@ const openDialog = (row: permissionResponseType, str: string) => {
   // 清空上一次的数据
   permissionForm.value = {
     id: '',
-    name: '',
-    code: '',
+    menuName: '',
+    menuPath: '',
     level: 0,
-    pid: ''
+    parentId: '',
+    menuIcon: '',
+    acl: ''
   }
   // 清空校验信息
   nextTick(() => {
@@ -150,7 +164,7 @@ const openDialog = (row: permissionResponseType, str: string) => {
     // 添加操作，level值是当前值 - 1
     permissionForm.value.level = row.level + 1
     // 添加父级id
-    permissionForm.value.pid = row.id
+    permissionForm.value.parentId = row.id
     title.value = row.level === 3 ? '添加功能' : '添加菜单'
   } else {
     permissionForm.value = JSON.parse(JSON.stringify(row))

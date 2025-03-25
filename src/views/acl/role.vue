@@ -170,8 +170,8 @@ const getRoleInfo = async () => {
     tableData.value = result.data.rolesList.map((role: roleResponseType) => {
       return {
         ...role,
-        createTime: dayjs(role.createTime).format('YYYY-MM-DD HH:mm:ss'),
-        updateTime: dayjs(role.createTime).format('YYYY-MM-DD HH:mm:ss')
+        createTime: dayjs(role.createTime).subtract(8, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+        updateTime: dayjs(role.createTime).subtract(8, 'hour').format('YYYY-MM-DD HH:mm:ss')
       }
     })
     total.value = result.data.total

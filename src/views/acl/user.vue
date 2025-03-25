@@ -179,8 +179,8 @@ const getUserInfo = async () => {
         ...item,
         id: item.userId,
         roleName: item.role!.join(','),
-        createTime: dayjs(item.createTime).format('YYYY-MM-DD HH:mm:ss'),
-        updateTime: dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')
+        createTime: dayjs(item.createTime).subtract(8, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+        updateTime: dayjs(item.updateTime).subtract(8, 'hour').format('YYYY-MM-DD HH:mm:ss')
       }
     })
   }
