@@ -8,11 +8,12 @@
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       v-loading="loading"
     >
-      <el-table-column prop="name" label="名称" width="200" />
-      <el-table-column prop="code" label="权限值" width="150" />
-      <el-table-column prop="createTime" label="创建时间" width="180" align="center" />
-      <el-table-column prop="updateTime" label="更新时间" width="180" align="center" />
-      <el-table-column label="操作" align="center">
+      <el-table-column prop="menuName" label="菜单名称" />
+      <el-table-column prop="menuPath" label="菜单路径" />
+      <el-table-column prop="menuIcon" label="菜单图标" />
+      <el-table-column prop="createTime" label="创建时间" align="center" />
+      <el-table-column prop="updateTime" label="更新时间" align="center" />
+      <el-table-column label="操作" align="center" minWidth="150px">
         <template #default="{ row }">
           <el-button
             type="warning"
