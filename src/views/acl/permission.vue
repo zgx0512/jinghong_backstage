@@ -1,8 +1,16 @@
 <template>
   <div class="container">
-    <el-button type="primary" icon="Plus" class="add_btn" @click="openDialog({}, 'add')">添加菜单</el-button>
-    <el-table :data="permissionTableData" style="width: 100%; margin-bottom: 20px" row-key="id" border
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" v-loading="loading">
+    <el-button type="primary" icon="Plus" class="add_btn" @click="openDialog({}, 'add')"
+      >添加菜单</el-button
+    >
+    <el-table
+      :data="permissionTableData"
+      style="width: 100%; margin-bottom: 20px"
+      row-key="id"
+      border
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+      v-loading="loading"
+    >
       <el-table-column prop="menuName" label="菜单名称" />
       <el-table-column prop="menuPath" label="菜单路径" min-width="110px" />
       <el-table-column prop="menuIcon" label="菜单图标" />
@@ -11,11 +19,16 @@
       <el-table-column prop="updateTime" label="更新时间" min-width="110px" align="center" />
       <el-table-column label="操作" fixed="right" align="center" min-width="150px">
         <template #default="{ row }">
-          <el-button type="primary" icon="Edit" size="small" :disabled="row.level === 1"
-            @click="openDialog(row, 'update')">编辑</el-button>
-          <el-popconfirm :title="`确定删除${row.name}?`" @confirm="removePermission(row.id)" width="180">
+          <el-button type="primary" icon="Edit" size="small" @click="openDialog(row, 'update')"
+            >编辑</el-button
+          >
+          <el-popconfirm
+            :title="`确定删除${row.name}?`"
+            @confirm="removePermission(row.id)"
+            width="180"
+          >
             <template #reference>
-              <el-button type="danger" icon="Delete" size="small" :disabled="row.level === 1">删除</el-button>
+              <el-button type="danger" icon="Delete" size="small">删除</el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -37,15 +50,36 @@
           <el-input placeholder="请输入权限值" v-model="permissionForm.acl"></el-input>
         </el-form-item>
         <el-form-item label="菜单等级" prop="level">
-          <el-select v-model="permissionForm.level" placeholder="请选择菜单等级" @change="handelChangeLevel">
-            <el-option v-for="item in menuLevelList" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select
+            v-model="permissionForm.level"
+            placeholder="请选择菜单等级"
+            @change="handelChangeLevel"
+          >
+            <el-option
+              v-for="item in menuLevelList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item v-if="permissionForm.level !== 1" label="归属菜单" prop="parentId"
-          :rules="[{ required: true, message: '请选择归属菜单！', trigger: 'change' }]">
-          <el-select v-model="permissionForm.parentId" placeholder="请选择归属菜单" @visible-change="getMenuListByLevel">
-            <el-option v-for="item in parentMenuList" :key="item.id" :label="`${item.menuName}(${item.menuPath})`"
-              :value="item.id"></el-option>
+        <el-form-item
+          v-if="permissionForm.level !== 1"
+          label="归属菜单"
+          prop="parentId"
+          :rules="[{ required: true, message: '请选择归属菜单！', trigger: 'change' }]"
+        >
+          <el-select
+            v-model="permissionForm.parentId"
+            placeholder="请选择归属菜单"
+            @visible-change="getMenuListByLevel"
+          >
+            <el-option
+              v-for="item in parentMenuList"
+              :key="item.id"
+              :label="`${item.menuName}(${item.menuPath})`"
+              :value="item.id"
+            ></el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -245,5 +279,8 @@ const getMenuListByLevel = async (visible: boolean) => {
 <style lang="scss" scoped>
 .add_btn {
   margin-bottom: 10px;
+  :deep(span) {
+    margin-top: 1px;
+  }
 }
 </style>

@@ -85,6 +85,9 @@ const customIcons = computed(() => {
 // 选择图标
 const selectIcon = (icon: string) => {
   selectedIcon.value = icon
+  // 清空搜索框
+  searchText.value = ''
+  // 触发外部值变化
   emit('update:modelValue', icon)
   // 关闭弹窗
   document.body.click()
