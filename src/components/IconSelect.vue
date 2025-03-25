@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-popover
-      placement="top"
+      placement="bottom"
       :hide-after="0"
       :width="700"
       trigger="click"
@@ -101,9 +101,10 @@ watch(
 
 <style scoped lang="scss">
 .icon-container {
+  max-height: 280px;
+  overflow-y: hidden;
   .icon-search {
     padding: 10px;
-    border-bottom: 1px solid #eee;
   }
 
   .icon-list {
@@ -113,6 +114,16 @@ watch(
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: 8px;
     padding: 10px;
+    padding-bottom: 50px;
+    /* 隐藏滚动条但保持可滚动功能 */
+    &::-webkit-scrollbar {
+      width: 0;
+      display: none;
+    }
+    /* Firefox */
+    scrollbar-width: none;
+    /* IE 和 Edge */
+    -ms-overflow-style: none;
   }
 }
 

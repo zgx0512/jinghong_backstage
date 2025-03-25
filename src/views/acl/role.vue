@@ -118,18 +118,22 @@ const tableHeadList = [
   },
   {
     label: '角色名称',
-    property: 'roleName'
+    property: 'roleName',
+    width: '100'
   },
   {
     label: '创建时间',
-    property: 'createTime'
+    property: 'createTime',
+    width: '180'
   },
   {
     label: '更新时间',
-    property: 'updateTime'
+    property: 'updateTime',
+    width: '180'
   },
   {
-    label: '操作'
+    label: '操作',
+    width: '300'
   }
 ]
 const roleName = ref<string>('') // 搜索文本框绑定的属性

@@ -5,7 +5,8 @@ enum API {
   MENULIST_URL = '/getMenuList',
   REMOVE_URL = '/admin/acl/permission/remove/',
   ADDPERMISSION_URL = '/addMenu',
-  UPDATEPERMISSION_URL = '/admin/acl/permission/update'
+  UPDATEPERMISSION_URL = '/admin/acl/permission/update',
+  MENULISTBYLEVEL_URL = '/getMenuByLevel'
 }
 
 // 获取菜单数据的接口
@@ -27,4 +28,9 @@ export const reqAddOrUpdatePermission = (permission: permissionResponseType) => 
     // 不存在，是新增
     return request.post(API.ADDPERMISSION_URL, permission)
   }
+}
+
+// 根据level获取上一级菜单
+export const reqMenuByLevel = (level: number) => {
+  return request.get<permissionInfoResponseType, any>(API.MENULISTBYLEVEL_URL + `?level=${level}`)
 }

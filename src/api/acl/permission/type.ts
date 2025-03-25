@@ -15,11 +15,11 @@ export interface permissionResponseType {
   toCode?: string | null
   type?: number
   status?: string | null
-  level: number
+  level?: number
   children?: permissionResponseType[]
   select?: boolean
-  menuIcon: string,
-  acl: string,
+  menuIcon?: string,
+  acl?: string,
 }
 // 获取菜单数据的接口的返回值的ts类型
 export interface permissionInfoResponseType extends responseType {

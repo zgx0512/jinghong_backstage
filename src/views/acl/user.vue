@@ -133,7 +133,7 @@ const tableHeadList = [
   {
     label: '用户角色',
     property: 'roleName',
-    minWidth: '120'
+    width: '120'
   },
   {
     label: '创建时间',
@@ -147,7 +147,7 @@ const tableHeadList = [
   },
   {
     label: '操作',
-    minWidth: '300'
+    width: '300'
   }
 ]
 // 表格基本布局

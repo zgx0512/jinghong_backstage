@@ -19,7 +19,7 @@
       :key="index"
       :label="item.label"
       :property="item.property"
-      :width="item.width"
+      :min-width="item.width"
       align="center"
       show-overflow-tooltip
       :fixed="item.label === '操作' ? 'right' : false"

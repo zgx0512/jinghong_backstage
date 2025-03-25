@@ -1,46 +1,21 @@
 <template>
   <div class="container">
-    <el-table
-      :data="permissionTableData"
-      style="width: 100%; margin-bottom: 20px"
-      row-key="id"
-      border
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-      v-loading="loading"
-    >
+    <el-button type="primary" icon="Plus" class="add_btn" @click="openDialog({}, 'add')">添加菜单</el-button>
+    <el-table :data="permissionTableData" style="width: 100%; margin-bottom: 20px" row-key="id" border
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" v-loading="loading">
       <el-table-column prop="menuName" label="菜单名称" />
       <el-table-column prop="menuPath" label="菜单路径" min-width="110px" />
       <el-table-column prop="menuIcon" label="菜单图标" />
       <el-table-column prop="acl" label="权限值"></el-table-column>
       <el-table-column prop="createTime" label="创建时间" min-width="110px" align="center" />
       <el-table-column prop="updateTime" label="更新时间" min-width="110px" align="center" />
-      <el-table-column label="操作" align="center" minWidth="150px">
+      <el-table-column label="操作" fixed="right" align="center" min-width="150px">
         <template #default="{ row }">
-          <el-button
-            type="warning"
-            icon="Plus"
-            size="small"
-            :disabled="row.level === 4"
-            @click="openDialog(row, 'add')"
-            >{{ row.level === 3 ? '添加功能' : '添加菜单' }}</el-button
-          >
-          <el-button
-            type="primary"
-            icon="Edit"
-            size="small"
-            :disabled="row.level === 1"
-            @click="openDialog(row, 'update')"
-            >编辑</el-button
-          >
-          <el-popconfirm
-            :title="`确定删除${row.name}?`"
-            @confirm="removePermission(row.id)"
-            width="180"
-          >
+          <el-button type="primary" icon="Edit" size="small" :disabled="row.level === 1"
+            @click="openDialog(row, 'update')">编辑</el-button>
+          <el-popconfirm :title="`确定删除${row.name}?`" @confirm="removePermission(row.id)" width="180">
             <template #reference>
-              <el-button type="danger" icon="Delete" size="small" :disabled="row.level === 1"
-                >删除</el-button
-              >
+              <el-button type="danger" icon="Delete" size="small" :disabled="row.level === 1">删除</el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -59,7 +34,19 @@
           <IconSelect style="width: 100%" v-model="permissionForm.menuIcon" />
         </el-form-item>
         <el-form-item label="权限值" prop="acl">
-          <IconSelect style="width: 100%" v-model="permissionForm.acl" />
+          <el-input placeholder="请输入权限值" v-model="permissionForm.acl"></el-input>
+        </el-form-item>
+        <el-form-item label="菜单等级" prop="level">
+          <el-select v-model="permissionForm.level" placeholder="请选择菜单等级" @change="handelChangeLevel">
+            <el-option v-for="item in menuLevelList" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item v-if="permissionForm.level !== 1" label="归属菜单" prop="parentId"
+          :rules="[{ required: true, message: '请选择归属菜单！', trigger: 'change' }]">
+          <el-select v-model="permissionForm.parentId" placeholder="请选择归属菜单" @visible-change="getMenuListByLevel">
+            <el-option v-for="item in parentMenuList" :key="item.id" :label="`${item.menuName}(${item.menuPath})`"
+              :value="item.id"></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -80,7 +67,8 @@ import IconSelect from '~/components/IconSelect.vue'
 import {
   reqPermissionInfo,
   reqRemovePermission,
-  reqAddOrUpdatePermission
+  reqAddOrUpdatePermission,
+  reqMenuByLevel
 } from '~/api/acl/permission'
 // 引入ts类型
 import { permissionResponseType } from '~/api/acl/permission/type'
@@ -99,17 +87,19 @@ const permissionForm = ref<permissionResponseType>({
   id: '',
   menuName: '',
   menuPath: '',
-  level: 0,
+  level: 1,
   parentId: '',
   menuIcon: '',
   acl: ''
 })
+// 表单校验规则
 // 添加|修改菜单表单校验规则
 const rules = ref({
   menuName: { required: true, message: '菜单名称不能为空！', trigger: 'blur' },
   acl: { required: true, message: '权限值不能为空！', trigger: 'blur' },
   menuIcon: { required: true, message: '菜单图标不能为空！', trigger: 'blur' },
-  menuPath: { required: true, message: '菜单路径不能为空！', trigger: 'blur' }
+  menuPath: { required: true, message: '菜单路径不能为空！', trigger: 'blur' },
+  level: { required: true, message: '菜单等级不能为空！', trigger: 'blur' }
 })
 // 获取菜单数据的函数
 const getPermissionInfo = async () => {
@@ -151,7 +141,7 @@ const openDialog = (row: permissionResponseType, str: string) => {
     id: '',
     menuName: '',
     menuPath: '',
-    level: 0,
+    level: 1,
     parentId: '',
     menuIcon: '',
     acl: ''
@@ -162,7 +152,7 @@ const openDialog = (row: permissionResponseType, str: string) => {
   })
   if (str === 'add') {
     // 添加操作，level值是当前值 - 1
-    permissionForm.value.level = row.level + 1
+    // permissionForm.value.level = row.level + 1
     // 添加父级id
     permissionForm.value.parentId = row.id
     title.value = row.level === 3 ? '添加功能' : '添加菜单'
@@ -210,6 +200,50 @@ const submit = () => {
     }
   })
 }
+// 菜单等级列表
+const menuLevelList = [
+  {
+    label: '一级菜单',
+    value: 1
+  },
+  {
+    label: '二级菜单',
+    value: 2
+  },
+  {
+    label: '三级菜单',
+    value: 3
+  }
+]
+const handelChangeLevel = () => {
+  // 菜单等级发生变化，清空父级菜单列表
+  parentMenuList.value = []
+  // 清空父级菜单id
+  permissionForm.value.parentId = ''
+}
+// 归属菜单列表
+const parentMenuList = ref<any[]>([])
+// 根据菜单等级获取菜单列表
+const getMenuListByLevel = async (visible: boolean) => {
+  if (!visible) return
+  try {
+    const result = await reqMenuByLevel(permissionForm.value.level as number)
+    if (result.code === 200) {
+      parentMenuList.value = result.data
+    } else {
+      ElMessage({
+        type: 'error',
+        message: result.message
+      })
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
 </script>
 
-<style lang="" scoped></style>
+<style lang="scss" scoped>
+.add_btn {
+  margin-bottom: 10px;
+}
+</style>
