@@ -3,9 +3,9 @@ import request from '~/utils/http/axios'
 import type { permissionResponseType, permissionInfoResponseType, removeResponseType } from './type'
 enum API {
   MENULIST_URL = '/getMenuList',
-  REMOVE_URL = '/admin/acl/permission/remove/',
+  REMOVE_URL = '/deleteMenu/',
   ADDPERMISSION_URL = '/addMenu',
-  UPDATEPERMISSION_URL = '/admin/acl/permission/update',
+  UPDATEPERMISSION_URL = '/updateMenu',
   MENULISTBYLEVEL_URL = '/getMenuByLevel'
 }
 

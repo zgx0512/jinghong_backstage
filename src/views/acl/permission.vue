@@ -1,39 +1,44 @@
 <template>
   <div class="container">
-    <el-button type="primary" icon="Plus" class="add_btn" @click="openDialog({}, 'add')"
-      >添加菜单</el-button
-    >
-    <el-table
-      :data="permissionTableData"
-      style="width: 100%; margin-bottom: 20px"
-      row-key="id"
-      border
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-      v-loading="loading"
-    >
-      <el-table-column prop="menuName" label="菜单名称" />
-      <el-table-column prop="menuPath" label="菜单路径" min-width="110px" />
-      <el-table-column prop="menuIcon" label="菜单图标" />
-      <el-table-column prop="acl" label="权限值"></el-table-column>
-      <el-table-column prop="createTime" label="创建时间" min-width="110px" align="center" />
-      <el-table-column prop="updateTime" label="更新时间" min-width="110px" align="center" />
-      <el-table-column label="操作" fixed="right" align="center" min-width="150px">
-        <template #default="{ row }">
-          <el-button type="primary" icon="Edit" size="small" @click="openDialog(row, 'update')"
-            >编辑</el-button
-          >
-          <el-popconfirm
-            :title="`确定删除${row.name}?`"
-            @confirm="removePermission(row.id)"
-            width="180"
-          >
-            <template #reference>
-              <el-button type="danger" icon="Delete" size="small">删除</el-button>
-            </template>
-          </el-popconfirm>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-card>
+      <el-button type="primary" icon="Plus" class="add_btn" @click="openDialog({}, 'add')"
+        >添加菜单</el-button
+      >
+      <el-button type="primary" icon="Plus" class="add_btn" @click="openBtnDialog"
+        >添加权限按钮</el-button
+      >
+      <el-table
+        :data="permissionTableData"
+        style="width: 100%; margin-bottom: 20px"
+        row-key="id"
+        border
+        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+        v-loading="loading"
+      >
+        <el-table-column prop="menuName" label="菜单名称" />
+        <el-table-column prop="menuPath" label="菜单路径" min-width="110px" />
+        <el-table-column prop="menuIcon" label="菜单图标" />
+        <el-table-column prop="acl" label="权限值"></el-table-column>
+        <el-table-column prop="createTime" label="创建时间" min-width="110px" align="center" />
+        <el-table-column prop="updateTime" label="更新时间" min-width="110px" align="center" />
+        <el-table-column label="操作" align="center" min-width="150px">
+          <template #default="{ row }">
+            <el-button type="primary" icon="Edit" size="small" @click="openDialog(row, 'update')"
+              >编辑</el-button
+            >
+            <el-popconfirm
+              :title="`确定删除${row.menuName}?`"
+              @confirm="removePermission(row.id)"
+              width="180"
+            >
+              <template #reference>
+                <el-button type="danger" icon="Delete" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
     <!-- 添加|修改菜单对话框 -->
     <el-dialog v-model="dialogVisible" :title="title" width="50%" :close-on-click-modal="false">
       <el-form label-width="80" :rules="rules" :model="permissionForm" ref="permissionFormRef">
@@ -90,6 +95,8 @@
         </span>
       </template>
     </el-dialog>
+    <!-- 添加|修改按钮对话框 -->
+    <addOrUpdateBtn ref="addOrUpdateBtnRef"></addOrUpdateBtn>
   </div>
 </template>
 
@@ -97,6 +104,7 @@
 import { ElMessage } from 'element-plus'
 import { ref, onMounted, nextTick } from 'vue'
 import IconSelect from '~/components/IconSelect.vue'
+import addOrUpdateBtn from './components/addOrUpdateBtn.vue'
 // 引入接口函数
 import {
   reqPermissionInfo,
@@ -188,11 +196,15 @@ const openDialog = (row: permissionResponseType, str: string) => {
     // 添加操作，level值是当前值 - 1
     // permissionForm.value.level = row.level + 1
     // 添加父级id
-    permissionForm.value.parentId = row.id
-    title.value = row.level === 3 ? '添加功能' : '添加菜单'
+    permissionForm.value.parentId = Number(row.id)
+    title.value = '添加菜单'
   } else {
     permissionForm.value = JSON.parse(JSON.stringify(row))
-    title.value = row.level === 3 ? '修改功能' : '修改菜单'
+    title.value = '修改菜单'
+    if (permissionForm.value.level !== 1) {
+      // 不是一级菜单，获取父级菜单列表
+      getMenuListByLevel(true)
+    }
   }
 }
 // 确认按钮的加载效果
@@ -208,26 +220,32 @@ const submit = () => {
       submitLoading.value = true
       try {
         // 调用接口
-        await reqAddOrUpdatePermission(permissionForm.value)
-        // 成功提示信息
-        ElMessage({
-          type: 'success',
-          message: '保存成功'
-        })
-        // 关闭加载效果
-        submitLoading.value = false
-        // 重新获取菜单数据
-        getPermissionInfo()
-        // 关闭对话框
-        dialogVisible.value = false
+        const res: any = await reqAddOrUpdatePermission(permissionForm.value)
+        if (res.code === 200) {
+          // 成功提示信息
+          ElMessage({
+            type: 'success',
+            message: '保存成功'
+          })
+          // 重新获取菜单数据
+          getPermissionInfo()
+          // 关闭对话框
+          dialogVisible.value = false
+        } else {
+          ElMessage({
+            type: 'error',
+            message: res.message
+          })
+        }
       } catch (error) {
-        // 关闭加载效果
-        submitLoading.value = false
         // 失败提示信息
         ElMessage({
           type: 'error',
           message: '保存失败'
         })
+      } finally {
+        // 关闭加载效果
+        submitLoading.value = false
       }
     } else {
       console.log('error submit!')
@@ -274,6 +292,11 @@ const getMenuListByLevel = async (visible: boolean) => {
     console.log(error)
   }
 }
+const addOrUpdateBtnRef = ref()
+const openBtnDialog = () => {
+  if (!addOrUpdateBtnRef.value) return;
+  addOrUpdateBtnRef.value.open()
+}
 </script>
 
 <style lang="scss" scoped>
@@ -283,4 +306,11 @@ const getMenuListByLevel = async (visible: boolean) => {
     margin-top: 1px;
   }
 }
+// .el-table {
+//   :deep(.el-table__header) {
+//     .el-table-fixed-column--right {
+//       border-bottom: 1px solid #dcdfe6;
+//     }
+//   }
+// }
 </style>
