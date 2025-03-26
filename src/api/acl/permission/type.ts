@@ -2,7 +2,7 @@
 interface responseType {
   code: number
   message: string
-  ok: boolean
+  ok?: boolean
 }
 // 每个菜单的ts类型
 export interface permissionResponseType {

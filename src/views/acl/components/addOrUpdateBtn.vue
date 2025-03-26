@@ -30,7 +30,6 @@ import { ref } from 'vue'
 import { reqPermissionInfo } from '~/api/acl/permission'
 const dialogVisible = ref(false)
 const title = ref('添加按钮')
-const formRef = ref(null)
 const form = ref({
   btnName: '',
   acl: '',
@@ -68,7 +67,8 @@ interface IMenu {
 const menuList = ref<IMenu[]>([])
 const menuProps = {
   label: 'menuName',
-  value: 'id'
+  value: 'id',
+  emitPath: false
 }
 const handelChangeMenu = async (bool: boolean) => {
   if (!bool) return
@@ -81,7 +81,15 @@ const handelChangeMenu = async (bool: boolean) => {
     console.log(error)
   }
 }
-const submit = () => {}
+const formRef = ref()
+const submit = () => {
+  if (!formRef.value) return;
+  formRef.value.validate((valid: boolean) => {
+    if (!valid) return;
+    // 表单校验成功
+    console.log(form.value)
+  })
+}
 defineExpose({
   open
 })
