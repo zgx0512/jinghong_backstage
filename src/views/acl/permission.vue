@@ -4,7 +4,7 @@
       <el-button type="primary" icon="Plus" class="add_btn" @click="openDialog({}, 'add')"
         >添加菜单</el-button
       >
-      <el-button type="primary" icon="Plus" class="add_btn" @click="openBtnDialog"
+      <el-button type="primary" icon="Plus" class="add_btn" @click="openBtnDialog({}, 'add')"
         >添加权限按钮</el-button
       >
       <el-table
@@ -15,20 +15,25 @@
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
         v-loading="loading"
       >
-        <el-table-column prop="menuName" label="菜单名称" />
-        <el-table-column prop="menuPath" label="菜单路径" min-width="110px" />
-        <el-table-column prop="menuIcon" label="菜单图标" />
+        <el-table-column prop="name" label="名称" min-width="110px" />
+        <el-table-column prop="path" label="路径" min-width="110px" />
+        <el-table-column prop="icon" label="图标" />
         <el-table-column prop="acl" label="权限值"></el-table-column>
+        <el-table-column prop="type" label="类别">
+          <template #default="{ row }">
+            <span>{{ row.type === 'menu'? '菜单' : '按钮' }}</span>
+          </template>  
+        </el-table-column>
         <el-table-column prop="createTime" label="创建时间" min-width="110px" align="center" />
         <el-table-column prop="updateTime" label="更新时间" min-width="110px" align="center" />
         <el-table-column label="操作" align="center" min-width="150px">
           <template #default="{ row }">
-            <el-button type="primary" icon="Edit" size="small" @click="openDialog(row, 'update')"
+            <el-button type="primary" icon="Edit" size="small" @click="handleOpenDialog(row, 'update')"
               >编辑</el-button
             >
             <el-popconfirm
-              :title="`确定删除${row.menuName}?`"
-              @confirm="removePermission(row.id)"
+              :title="`确定删除${row.name}${row.type === 'menu' ? '菜单' : '按钮'}?`"
+              @confirm="removePermission(row)"
               width="180"
             >
               <template #reference>
@@ -42,14 +47,14 @@
     <!-- 添加|修改菜单对话框 -->
     <el-dialog v-model="dialogVisible" :title="title" width="50%" :close-on-click-modal="false">
       <el-form label-width="80" :rules="rules" :model="permissionForm" ref="permissionFormRef">
-        <el-form-item label="菜单名称" prop="menuName">
-          <el-input placeholder="请输入菜单名称" v-model="permissionForm.menuName"></el-input>
+        <el-form-item label="菜单名称" prop="name">
+          <el-input placeholder="请输入菜单名称" v-model="permissionForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="菜单路径" prop="menuPath">
-          <el-input placeholder="请输入菜单路径" v-model="permissionForm.menuPath"></el-input>
+        <el-form-item label="菜单路径" prop="path">
+          <el-input placeholder="请输入菜单路径" v-model="permissionForm.path"></el-input>
         </el-form-item>
-        <el-form-item label="菜单图标" prop="menuIcon">
-          <IconSelect style="width: 100%" v-model="permissionForm.menuIcon" />
+        <el-form-item label="菜单图标" prop="icon">
+          <IconSelect style="width: 100%" v-model="permissionForm.icon" />
         </el-form-item>
         <el-form-item label="权限值" prop="acl">
           <el-input placeholder="请输入权限值" v-model="permissionForm.acl"></el-input>
@@ -96,7 +101,7 @@
       </template>
     </el-dialog>
     <!-- 添加|修改按钮对话框 -->
-    <addOrUpdateBtn ref="addOrUpdateBtnRef"></addOrUpdateBtn>
+    <addOrUpdateBtn ref="addOrUpdateBtnRef" @refresh="refresh"></addOrUpdateBtn>
   </div>
 </template>
 
@@ -112,8 +117,9 @@ import {
   reqAddOrUpdatePermission,
   reqMenuByLevel
 } from '~/api/acl/permission'
+import { removeBtn } from '~/api/acl/btn'
 // 引入ts类型
-import { permissionResponseType } from '~/api/acl/permission/type'
+import type { permissionResponseType } from '~/api/acl/permission/type'
 // 菜单表格数组对象
 const permissionTableData = ref([])
 // 菜单数据加载效果
@@ -127,20 +133,20 @@ const permissionFormRef = ref()
 // 添加|修改菜单表单对象
 const permissionForm = ref<permissionResponseType>({
   id: '',
-  menuName: '',
-  menuPath: '',
+  name: '',
+  path: '',
   level: 1,
   parentId: '',
-  menuIcon: '',
+  icon: '',
   acl: ''
 })
 // 表单校验规则
 // 添加|修改菜单表单校验规则
 const rules = ref({
-  menuName: { required: true, message: '菜单名称不能为空！', trigger: 'blur' },
+  name: { required: true, message: '菜单名称不能为空！', trigger: 'blur' },
   acl: { required: true, message: '权限值不能为空！', trigger: 'blur' },
-  menuIcon: { required: true, message: '菜单图标不能为空！', trigger: 'blur' },
-  menuPath: { required: true, message: '菜单路径不能为空！', trigger: 'blur' },
+  icon: { required: true, message: '菜单图标不能为空！', trigger: 'blur' },
+  path: { required: true, message: '菜单路径不能为空！', trigger: 'blur' },
   level: { required: true, message: '菜单等级不能为空！', trigger: 'blur' }
 })
 // 获取菜单数据的函数
@@ -156,9 +162,15 @@ onMounted(() => {
   getPermissionInfo()
 })
 // 删除按钮的回调
-const removePermission = async (id: string | number) => {
+const removePermission = async (row: permissionResponseType) => {
+  let api = reqRemovePermission
+  let id = row.id!
+  if (row.type === 'btn') {
+    api = removeBtn
+    id = row.btnId!
+  }
   // 调用接口
-  const result = await reqRemovePermission(id)
+  const result = await api(id)
   if (result.code === 200) {
     ElMessage({
       type: 'success',
@@ -174,6 +186,13 @@ const removePermission = async (id: string | number) => {
     })
   }
 }
+const handleOpenDialog = (row: permissionResponseType, str: string) => {
+  if (row.type === 'menu') {
+    openDialog(row, str);
+  } else if (row.type === 'btn') {
+    openBtnDialog(row, str);
+  }
+}
 // 添加|修改菜单按钮的回调
 const openDialog = (row: permissionResponseType, str: string) => {
   // 打开对话框
@@ -181,11 +200,11 @@ const openDialog = (row: permissionResponseType, str: string) => {
   // 清空上一次的数据
   permissionForm.value = {
     id: '',
-    menuName: '',
-    menuPath: '',
+    name: '',
+    path: '',
     level: 1,
     parentId: '',
-    menuIcon: '',
+    icon: '',
     acl: ''
   }
   // 清空校验信息
@@ -293,9 +312,12 @@ const getMenuListByLevel = async (visible: boolean) => {
   }
 }
 const addOrUpdateBtnRef = ref()
-const openBtnDialog = () => {
+const openBtnDialog = (row: permissionResponseType, str: string) => {
   if (!addOrUpdateBtnRef.value) return;
-  addOrUpdateBtnRef.value.open()
+  addOrUpdateBtnRef.value.open(row, str)
+}
+const refresh = () => {
+  getPermissionInfo()
 }
 </script>
 

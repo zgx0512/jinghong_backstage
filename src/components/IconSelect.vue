@@ -138,6 +138,7 @@ watch(
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.3s;
+  height: 74px;
 
   &:hover {
     background-color: var(--el-color-primary-light-9);

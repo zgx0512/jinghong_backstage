@@ -10,8 +10,8 @@ enum API {
 }
 
 // 获取菜单数据的接口
-export const reqPermissionInfo = () => {
-  return request.get<permissionInfoResponseType, any>(API.MENULIST_URL)
+export const reqPermissionInfo = (params: { type: number } = { type: 0 }) => {
+  return request.get<permissionInfoResponseType, any>(API.MENULIST_URL + `?type=${params.type}`)
 }
 
 // 递归删除菜单的接口
