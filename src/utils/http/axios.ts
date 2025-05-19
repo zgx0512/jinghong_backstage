@@ -38,7 +38,7 @@ request.interceptors.response.use(
     let msg = ''
     let status = 0
     if (error.response) {
-      status = error.resopnse.status
+      status = error.response.status
     }
     switch (status) {
       case 401:

@@ -70,22 +70,25 @@ const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate(async (valid: boolean) => {
     if (valid) {
-      loading.value = true
-      const result = await userStore.userLogin(param);
-      if (result.bool) {
-        ElMessage({
-          type: 'success',
-          message: '登录成功'
-        })
-        loading.value = false
-        router.push('/')
-        // userStore.getUserInfo()
-      } else {
-        ElMessage({
-          type: 'error',
-          message: result.message || "登录失败"
-
-        })
+      try {
+        loading.value = true
+        const result = await userStore.userLogin(param)
+        if (result.bool) {
+          ElMessage({
+            type: 'success',
+            message: '登录成功'
+          })
+          router.push('/')
+          // userStore.getUserInfo()
+        } else {
+          ElMessage({
+            type: 'error',
+            message: result.message || '登录失败'
+          })
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
         loading.value = false
       }
     }
