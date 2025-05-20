@@ -12,10 +12,10 @@
           :disabled="props.disabled"
         >
           <el-option
-            :label="category1.name"
-            :value="category1.id"
             v-for="category1 in category1List"
             :key="category1.id"
+            :label="category1.name"
+            :value="category1.id"
           />
         </el-select>
       </el-form-item>
@@ -27,10 +27,10 @@
           :disabled="props.disabled"
         >
           <el-option
-            :label="category2.name"
-            :value="category2.id"
             v-for="category2 in category2List"
             :key="category2.id"
+            :label="category2.name"
+            :value="category2.id"
           />
         </el-select>
       </el-form-item>
@@ -41,10 +41,10 @@
           :disabled="props.disabled"
         >
           <el-option
-            :label="category3.name"
-            :value="category3.id"
             v-for="category3 in category3List"
             :key="category3.id"
+            :label="category3.name"
+            :value="category3.id"
           />
         </el-select>
       </el-form-item>
@@ -55,8 +55,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, defineEmits, watch, defineProps, withDefaults } from 'vue'
 import { reqCategory1Info, reqCategory2Info, reqCategory3Info } from '~/api/product/category'
-// 引入ts类型
-import { categoryResponseType } from '~/api/product/category/type'
 const emits = defineEmits(['initCategory'])
 const props = withDefaults(
   defineProps<{
@@ -121,4 +119,8 @@ watch(
 )
 </script>
 
-<style lang="" scoped></style>
+<style lang="scss" scoped>
+:deep(.is-hidden) {
+  position: static !important;
+}
+</style>
