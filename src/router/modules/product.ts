@@ -51,6 +51,15 @@ const routes: RouteRecordRaw[] = [
           title: '属性管理',
           icon: 'ep-document'
         }
+      },
+      {
+        path: 'category',
+        name: 'category',
+        component: () => import('~/views/product/category.vue'),
+        meta: {
+          title: '分类管理',
+          icon: 'ep-wallet'
+        }
       }
     ]
   }

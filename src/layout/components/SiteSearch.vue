@@ -78,7 +78,7 @@ function onOpen() {
   })
   localeRouteList = deepClone(flatRouteList)
   localeRouteList.forEach((cur) => {
-    cur.meta.title = t('route.' + cur?.meta?.title)
+    cur.meta!.title = t('route.' + cur?.meta?.title)
   })
 }
 

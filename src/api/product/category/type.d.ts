@@ -6,13 +6,19 @@ interface responseType {
 }
 
 // 每个分类的ts类型
-export interface categoryResponseType {
+interface categoryResponseType {
   id?: number | string
   createTime?: string
   updateTime?: string
   name?: string
+  level?: number
+  parentId?: number | string | null
 }
 // 获取商品分类接口返回值的ts类型
-export interface categoryInfoResponseType extends responseType {
+interface categoryInfoResponseType extends responseType {
   data: categoryResponseType[]
+}
+
+interface categoryAddParamsType extends responseType {
+  data: null
 }
