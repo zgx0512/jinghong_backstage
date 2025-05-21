@@ -10,9 +10,9 @@
           width="150"
           align="center"
         ></el-table-column>
-        <el-table-column prop="logoUrl" label="品牌LOGO" width="150" align="center">
+        <el-table-column prop="logoUrl" label="品牌LOGO" width="200" align="center">
           <template #default="{ row }">
-            <img :src="row.logoUrl" alt="" style="width: 40px; display: inline-block" />
+            <img :src="row.logoUrl" alt="" style="height: 40px; display: inline-block" />
           </template>
         </el-table-column>
         <el-table-column

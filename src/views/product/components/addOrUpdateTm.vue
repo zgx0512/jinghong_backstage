@@ -1,6 +1,6 @@
 <template>
   <el-dialog v-model="dialogVisible" :title="title" width="50%">
-    <el-form :label-width="100" ref="tmFormRef" :rules="rules" :model="tmInfo">
+    <el-form v-loading="formLoading" :label-width="100" ref="tmFormRef" :rules="rules" :model="tmInfo">
       <el-form-item label="品牌名称" prop="tmName">
         <el-input placeholder="请输入品牌名称" v-model="tmInfo.tmName"></el-input>
       </el-form-item>
@@ -89,12 +89,15 @@ const open = (row: tmResponseType) => {
   }
   dialogVisible.value = true
 }
+const formLoading = ref<boolean>(false);
 // 图片上传成功后的回调
 const handleAvatarSuccess = (res: any) => {
   if (res.code === 200) {
     imageUrl.value = res.data.url
+    formLoading.value = false
   }
 }
+
 // 图片上传之前的回调
 const beforeAvatarUpload = (file: any) => {
   if (
@@ -118,6 +121,7 @@ const beforeAvatarUpload = (file: any) => {
     })
     return false
   }
+  formLoading.value = true
   return true
 }
 // 确认按钮的回调
