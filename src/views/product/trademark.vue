@@ -12,19 +12,17 @@
         ></el-table-column>
         <el-table-column prop="logoUrl" label="品牌LOGO" width="150" align="center">
           <template #default="{ row }">
-            <img :src="row.logoUrl" alt="" style="width: 70px; display: inline-block" />
+            <img :src="row.logoUrl" alt="" style="width: 40px; display: inline-block" />
           </template>
         </el-table-column>
         <el-table-column
           prop="createTime"
           label="创建时间"
-          width="200"
           align="center"
         ></el-table-column>
         <el-table-column
           prop="updateTime"
           label="更新时间"
-          width="200"
           align="center"
         ></el-table-column>
         <el-table-column label="操作" align="center">
@@ -84,7 +82,7 @@ const getTmList = async () => {
   const result = await reqTrademarkInfo(page.value, limit.value)
   if (result.code === 200) {
     // 赋值
-    tmList.value = result.data.records
+    tmList.value = result.data.trademarkList
     total.value = result.data.total
     // 关闭加载效果
     loading.value = false

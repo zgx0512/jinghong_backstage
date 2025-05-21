@@ -7,7 +7,8 @@
       <el-form-item label="品牌LOGO" prop="logoUrl">
         <el-upload
           class="avatar-uploader"
-          action="/api/admin/product/fileUpload"
+          :headers="uploadHeaders"
+          :action="`${env.VITE_BASE_URL}/upload`"
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
           :before-upload="beforeAvatarUpload"
@@ -35,6 +36,12 @@ import { reqAddorUpdateTM } from '~/api/product/trademark'
 import type { tmResponseType } from '~/api/product/trademark/type'
 // 引入自定义校验规则
 import { tmNameValidatePass, tmLogoValidatePass } from '~/utils/validate'
+import { getToken } from '~/utils/token'
+// 引入环境变量
+const env = import.meta.env
+const uploadHeaders = {
+  Authorization: `Bearer ${getToken()}`
+}
 // 接收父组件传递过来的函数
 const emits = defineEmits(['submit'])
 // 控制对话框的显示与隐藏
@@ -85,7 +92,7 @@ const open = (row: tmResponseType) => {
 // 图片上传成功后的回调
 const handleAvatarSuccess = (res: any) => {
   if (res.code === 200) {
-    imageUrl.value = res.data
+    imageUrl.value = res.data.url
   }
 }
 // 图片上传之前的回调
