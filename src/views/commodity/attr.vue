@@ -63,9 +63,9 @@ import { ref, nextTick } from 'vue'
 // 引入分类选择器组件
 import Category from '~/components/category.vue'
 // 引入接口函数
-import { reqAttrInfo, reqRemoveAttr } from '~/api/product/attr'
+import { reqAttrInfo, reqRemoveAttr } from '~/api/commodity/attr'
 // 引入ts类型
-import type { attrReponseType } from '~/api/product/attr/type'
+import type { attrReponseType } from '~/api/commodity/attr/type'
 // 引入子组件
 import AddOrupdateAttr from './components/addOrupdateAttr.vue'
 import { ElMessage } from 'element-plus'

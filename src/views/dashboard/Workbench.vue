@@ -84,23 +84,23 @@ const navList = ref([
     icon: 'permission'
   },
   {
-    name: 'SPU管理',
-    url: '/product/spu',
+    name: '商品列表',
+    url: '/commodity/commodity_list',
     icon: 'spu'
   },
   {
     name: 'SKU管理',
-    url: '/product/sku',
+    url: '/commodity/sku',
     icon: 'sku'
   },
   {
     name: '品牌管理',
-    url: '/product/trademark',
+    url: '/commodity/trademark',
     icon: 'trademark'
   },
   {
     name: '属性管理',
-    url: '/product/attr',
+    url: '/commodity/attr',
     icon: 'attr'
   }
 ])

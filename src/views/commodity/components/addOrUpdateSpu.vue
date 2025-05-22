@@ -99,18 +99,18 @@
 <script lang="ts" setup>
 import { ref, onMounted, defineEmits, nextTick, defineExpose } from 'vue'
 // 引入接口函数
-import { reqSaleAttrInfo, reqAddOrUpdateSPU, reqSpuFormId } from '~/api/product/spu'
+import { reqSaleAttrInfo, reqAddOrUpdateSPU, reqSpuFormId } from '~/api/commodity/commodity_list'
 // 引入ts类型
 import {
   spuResponseType,
   saleAttrResponseType,
   saleAttrValueResponseType,
   imageResponseType
-} from '~/api/product/spu/type'
+} from '~/api/commodity/commodity_list/type'
 // 引入接口函数
-import { reqTmList } from '~/api/product/trademark'
+import { reqTmList } from '~/api/commodity/trademark'
 // 引入ts类型
-import { tmResponseType, tmListResponseType } from '~/api/product/trademark/type'
+import { tmResponseType, tmListResponseType } from '~/api/commodity/trademark/type'
 import { ElMessage } from 'element-plus'
 // 引入自定义校验规则
 import { imageListValidatePass } from '~/utils/validate'

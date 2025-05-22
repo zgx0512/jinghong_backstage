@@ -54,7 +54,7 @@ import {
   reqAddCategory,
   reqUpdateCategory,
   reqEditClassifyByLevel
-} from '~/api/product/category'
+} from '~/api/commodity/category'
 import { ElMessage } from 'element-plus'
 const emit = defineEmits(['refresh'])
 // 对话框状态

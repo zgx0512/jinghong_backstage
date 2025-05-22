@@ -6,10 +6,10 @@ import Layout from '~/layout/index.vue'
 
 const routes: RouteRecordRaw[] = [
   {
-    path: '/product',
-    name: 'product',
+    path: '/commodity',
+    name: 'commodity',
     component: Layout,
-    redirect: '/product/spu',
+    redirect: '/commodity/commodity_list',
     meta: {
       title: '商品管理',
       icon: 'ep-goods',
@@ -17,11 +17,11 @@ const routes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'spu',
-        name: 'spu',
-        component: () => import('~/views/product/spu.vue'),
+        path: 'commodity_list',
+        name: 'commodity_list',
+        component: () => import('~/views/commodity/commodity_list.vue'),
         meta: {
-          title: 'SPU管理',
+          title: '商品列表',
           icon: 'ep-film'
         }
       },

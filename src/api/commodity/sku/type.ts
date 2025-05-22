@@ -1,5 +1,5 @@
 // 引入sku的ts类型
-import { skuResponseType } from '../spu/type'
+import { skuResponseType } from '../commodity_list/type'
 interface responseType {
   code: number
   message: string

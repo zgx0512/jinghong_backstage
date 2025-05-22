@@ -12,10 +12,10 @@
     <el-card style="margin-bottom: 10px">
       <category @initCategory="initCategory" :disabled="showSpuData !== 0"></category>
     </el-card>
-    <!-- 展示spu数据卡片 -->
+    <!-- 展示商品数据卡片 -->
     <el-card v-if="showSpuData === 0">
       <el-button type="primary" icon="Plus" :disabled="!category3Id" @click="open"
-        >添加SPU</el-button
+        >添加商品</el-button
       >
       <tph-table :tableData="spuList" :tableHeadList="tableHeadList" :tableProp="tableProp" v-loading="loading">
         <template #default="{ row }">
@@ -83,13 +83,13 @@
 import category from '~/components/category.vue'
 import { ref, nextTick } from 'vue'
 // 引入接口函数
-import { reqSpuInfo, reqRemoveSpu } from '~/api/product/spu'
+import { reqSpuInfo, reqRemoveSpu } from '~/api/commodity/commodity_list'
 // 引入子组件
 import addOrUpdateSpu from './components/addOrUpdateSpu.vue'
 import addOrUpdateSku from './components/addOrUpdateSku.vue'
 import skuInfo from './components/skuInfo.vue'
 // 引入ts类型
-import { spuResponseType } from '~/api/product/spu/type'
+import { spuResponseType } from '~/api/commodity/commodity_list/type'
 import { ElMessage } from 'element-plus'
 // spu数据列表
 const spuList = ref<spuResponseType[]>([])
@@ -107,23 +107,23 @@ const tableProp = {
 // spu表格的表头列表
 const tableHeadList = [
   {
-    label: 'SPU名称',
-    property: 'spuName',
-    width: '100'
+    label: '商品',
+    property: 'goods_name',
+    width: '200'
   },
   {
-    label: 'SPU描述',
-    property: 'description',
+    label: '售价(元)',
+    property: 'min_group_price',
     width: '180'
   },
   {
-    label: '创建时间',
-    property: 'createTime',
+    label: '销量',
+    property: 'sales_num',
     width: '180'
   },
   {
-    label: '更新时间',
-    property: 'updateTime',
+    label: '上架状态',
+    property: 'is_onsale',
     width: '180'
   },
   {

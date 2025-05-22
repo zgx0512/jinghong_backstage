@@ -57,9 +57,9 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 // 引入接口函数
-import { reqTrademarkInfo, reqRemoveTm } from '~/api/product/trademark'
+import { reqTrademarkInfo, reqRemoveTm } from '~/api/commodity/trademark'
 // 引入ts类型
-import type { tmResponseType } from '~/api/product/trademark/type'
+import type { tmResponseType } from '~/api/commodity/trademark/type'
 // 引入子组件
 import addOrUpdateTm from './components/addOrUpdateTm.vue'
 import { ElMessage } from 'element-plus'

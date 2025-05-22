@@ -31,9 +31,9 @@
 import { ElMessage } from 'element-plus'
 import { ref, defineEmits } from 'vue'
 // 引入接口函数
-import { reqAddorUpdateTM } from '~/api/product/trademark'
+import { reqAddorUpdateTM } from '~/api/commodity/trademark'
 // 引入ts类型
-import type { tmResponseType } from '~/api/product/trademark/type'
+import type { tmResponseType } from '~/api/commodity/trademark/type'
 // 引入自定义校验规则
 import { tmNameValidatePass, tmLogoValidatePass } from '~/utils/validate'
 import { getToken } from '~/utils/token'

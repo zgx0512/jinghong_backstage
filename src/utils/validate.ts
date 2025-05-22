@@ -2,9 +2,9 @@
 自定义校验规则文件
  */
 // 引入接口函数
-import { reqTmList } from '~/api/product/trademark'
+import { reqTmList } from '~/api/commodity/trademark'
 // 引入ts类型
-import { tmResponseType } from '~/api/product/trademark/type'
+import { tmResponseType } from '~/api/commodity/trademark/type'
 import { ref } from 'vue'
 
 // 邮箱校验规则

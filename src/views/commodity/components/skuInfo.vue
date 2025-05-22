@@ -16,9 +16,9 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 // 引入接口函数
-import { reqSkuListBySpuId } from '~/api/product/spu'
+import { reqSkuListBySpuId } from '~/api/commodity/commodity_list'
 // 引入ts类型
-import { skuListResponseType, skuResponseType, spuResponseType } from '~/api/product/spu/type'
+import { skuListResponseType, skuResponseType, spuResponseType } from '~/api/commodity/commodity_list/type'
 const dialogVisible = ref<boolean>(false)
 // 标题
 const spuName = ref<string>('')

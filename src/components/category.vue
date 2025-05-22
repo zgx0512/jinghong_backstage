@@ -54,7 +54,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, defineEmits, watch, defineProps, withDefaults } from 'vue'
-import { reqCategory1Info, reqCategory2Info, reqCategory3Info } from '~/api/product/category'
+import { reqCategory1Info, reqCategory2Info, reqCategory3Info } from '~/api/commodity/category'
 const emits = defineEmits(['initCategory'])
 const props = withDefaults(
   defineProps<{

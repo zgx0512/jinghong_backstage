@@ -66,10 +66,10 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 // 引入接口函数
-import { reqSkuInfo } from '~/api/product/sku'
+import { reqSkuInfo } from '~/api/commodity/sku'
 // 引入ts类型
-import { skuInfoResponseType } from '~/api/product/sku/type'
-import { skuResponseType } from '~/api/product/spu/type'
+import { skuInfoResponseType } from '~/api/commodity/sku/type'
+import { skuResponseType } from '~/api/commodity/commodity_list/type'
 // 控制抽屉的显示与隐藏
 const drawer = ref<boolean>(false)
 // sku详情

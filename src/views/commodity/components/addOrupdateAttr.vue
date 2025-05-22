@@ -53,9 +53,9 @@
 import { ElMessage } from 'element-plus'
 import { ref, nextTick, defineEmits, defineExpose } from 'vue'
 // 引入接口函数
-import { reqSaveAttrInfo } from '~/api/product/attr'
+import { reqSaveAttrInfo } from '~/api/commodity/attr'
 // 引入ts类型
-import type { attrValueResponseType, attrReponseType } from '~/api/product/attr/type'
+import type { attrValueResponseType, attrReponseType } from '~/api/commodity/attr/type'
 const emits = defineEmits(['cancel', 'submit'])
 const baseAttrInfo = ref<attrReponseType>({
   attrName: '', // 属性名称

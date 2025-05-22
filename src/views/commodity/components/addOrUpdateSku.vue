@@ -91,18 +91,18 @@
 <script lang="ts" setup>
 import { ref, defineExpose, defineEmits, nextTick } from 'vue'
 // 引入接口函数
-import { reqAttrInfo } from '~/api/product/attr'
-import { reqSpuImageList, reqSpuSaleAttrList, reqAddSkuInfo } from '~/api/product/spu'
-import { reqSkuInfo } from '~/api/product/sku'
+import { reqAttrInfo } from '~/api/commodity/attr'
+import { reqSpuImageList, reqSpuSaleAttrList, reqAddSkuInfo } from '~/api/commodity/commodity_list'
+import { reqSkuInfo } from '~/api/commodity/sku'
 // 引入ts类型
-import { attrInfoResponse, attrReponseType } from '~/api/product/attr/type'
+import { attrInfoResponse, attrReponseType } from '~/api/commodity/attr/type'
 import {
   spuImageListResponseType,
   imageResponseType,
   saleAttrResponseType,
   saleAttrInfoResponseType,
   skuResponseType
-} from '~/api/product/spu/type'
+} from '~/api/commodity/commodity_list/type'
 import { ElMessage } from 'element-plus'
 const emits = defineEmits(['cancel', 'submit'])
 // 一级分类id

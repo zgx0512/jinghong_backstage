@@ -45,7 +45,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import addOrUpdateCategory from './components/addOrUpdateCategory.vue'
-import { reqAllCategoryList, reqDeleteCategory } from '~/api/product/category'
+import { reqAllCategoryList, reqDeleteCategory } from '~/api/commodity/category'
 import { ElMessage } from 'element-plus'
 // 菜单表格数组对象
 const classifyTableData = ref<categoryResponseType[]>([])

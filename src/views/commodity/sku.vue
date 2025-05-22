@@ -90,10 +90,10 @@
 import { ElMessage } from 'element-plus'
 import { ref, onMounted, nextTick } from 'vue'
 // 引入接口函数
-import { reqSkuList, reqOnSaleSku, reqCancelSaleSku, reqRemoveSku } from '~/api/product/sku'
+import { reqSkuList, reqOnSaleSku, reqCancelSaleSku, reqRemoveSku } from '~/api/commodity/sku'
 // 引入ts类型
-import { skuListResponseType } from '~/api/product/sku/type'
-import { skuResponseType } from '~/api/product/spu/type'
+import { skuListResponseType } from '~/api/commodity/sku/type'
+import type { skuResponseType } from '~/api/commodity/commodity_list/type'
 // 引入子组件
 import skuDetail from './components/skuDetail.vue'
 // 引入子组件
