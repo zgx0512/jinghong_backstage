@@ -96,13 +96,6 @@ import { reqSpuImageList, reqSpuSaleAttrList, reqAddSkuInfo } from '~/api/commod
 import { reqSkuInfo } from '~/api/commodity/sku'
 // 引入ts类型
 import { attrInfoResponse, attrReponseType } from '~/api/commodity/attr/type'
-import {
-  spuImageListResponseType,
-  imageResponseType,
-  saleAttrResponseType,
-  saleAttrInfoResponseType,
-  skuResponseType
-} from '~/api/commodity/commodity_list/type'
 import { ElMessage } from 'element-plus'
 const emits = defineEmits(['cancel', 'submit'])
 // 一级分类id

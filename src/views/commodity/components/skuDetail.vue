@@ -69,7 +69,6 @@ import { ref } from 'vue'
 import { reqSkuInfo } from '~/api/commodity/sku'
 // 引入ts类型
 import { skuInfoResponseType } from '~/api/commodity/sku/type'
-import { skuResponseType } from '~/api/commodity/commodity_list/type'
 // 控制抽屉的显示与隐藏
 const drawer = ref<boolean>(false)
 // sku详情

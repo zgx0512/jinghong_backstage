@@ -7,15 +7,6 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import request from '~/utils/http/axios'
-// 引入ts类型
-import {
-  spuInfoResponseType,
-  saleAttrInfoResponseType,
-  spuResponseType,
-  nullResponseType,
-  spuImageListResponseType,
-  skuListResponseType
-} from './type'
 
 enum API {
   SPULIST_URL = '/admin/product/',
@@ -31,10 +22,10 @@ enum API {
   UPDATESKU_URL = '/admin/product/updateSkuInfo'
 }
 
-// 获取spu数据的接口
-export const reqSpuInfo = (page: number, limit: number, category3Id: number | string) => {
-  return request.get<spuInfoResponseType, any>(
-    `${API.SPULIST_URL}${page}/${limit}?category3Id=${category3Id}`
+// 获取商品数据的接口
+export const reqCommodityList = (page: number, limit: number, category3Id: number | string) => {
+  return request.get<GoodsInfoResponseType, any>(
+    `/getGoodsList?page=${page}&limit=${limit}&category_id=${category3Id}`
   )
 }
 
@@ -44,8 +35,8 @@ export const reqSaleAttrInfo = () => {
 }
 
 // 新增|编辑SPU的接口
-export const reqAddOrUpdateSPU = (data: spuResponseType) => {
-  if (data.id) {
+export const reqAddOrUpdateSPU = (data: GoodsResponseType) => {
+  if (data.goods_id) {
     // 存在，是修改
     return request.post<nullResponseType, any>(API.UPDATESPU_URL, data)
   } else {
@@ -55,7 +46,7 @@ export const reqAddOrUpdateSPU = (data: spuResponseType) => {
 
 // 获取当前spu的所有数据
 export const reqSpuFormId = (spuId: number | string) => {
-  return request.get<spuResponseType, any>(API.GETSPUINFO_URL + spuId)
+  return request.get<GoodsResponseType, any>(API.GETSPUINFO_URL + spuId)
 }
 
 // 获取spu图片的接口
@@ -86,4 +77,14 @@ export const reqSkuListBySpuId = (id: number | string) => {
 // 删除spu的接口
 export const reqRemoveSpu = (id: number | string) => {
   return request.delete<nullResponseType, any>(API.REMOVESPU_URL + id)
+}
+
+// 获取规格类型列表的接口
+export const reqSpecList = () => {
+  return request.get<specListResponseType, any>('/getSpecList')
+}
+
+// 新增规格类型的接口
+export const reqAddSpec = (data: any) => {
+  return request.post<nullResponseType, any>('/addSpec', data)
 }

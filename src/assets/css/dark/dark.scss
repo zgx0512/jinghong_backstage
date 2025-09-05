@@ -6,4 +6,14 @@ html.dark {
   .tags {
     background-color: black;
   }
+  .sku-table {
+    tr, th, td {
+      border-color: #333;
+    }
+    thead {
+      th {
+        background-color: #151515;
+      }
+    }
+  }
 }

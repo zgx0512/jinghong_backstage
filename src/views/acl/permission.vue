@@ -21,14 +21,18 @@
         <el-table-column prop="acl" label="权限值"></el-table-column>
         <el-table-column prop="type" label="类别">
           <template #default="{ row }">
-            <span>{{ row.type === 'menu'? '菜单' : '按钮' }}</span>
-          </template>  
+            <span>{{ row.type === 'menu' ? '菜单' : '按钮' }}</span>
+          </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" min-width="110px" align="center" />
         <el-table-column prop="updateTime" label="更新时间" min-width="110px" align="center" />
         <el-table-column label="操作" align="center" min-width="150px">
           <template #default="{ row }">
-            <el-button type="primary" icon="Edit" size="small" @click="handleOpenDialog(row, 'update')"
+            <el-button
+              type="primary"
+              icon="Edit"
+              size="small"
+              @click="handleOpenDialog(row, 'update')"
               >编辑</el-button
             >
             <el-popconfirm
@@ -108,8 +112,6 @@
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus'
 import { ref, onMounted, nextTick } from 'vue'
-import IconSelect from '~/components/IconSelect.vue'
-import addOrUpdateBtn from './components/addOrUpdateBtn.vue'
 // 引入接口函数
 import {
   reqPermissionInfo,
@@ -118,6 +120,8 @@ import {
   reqMenuByLevel
 } from '~/api/acl/permission'
 import { removeBtn } from '~/api/acl/btn'
+import IconSelect from '~/components/IconSelect.vue'
+import addOrUpdateBtn from './components/addOrUpdateBtn.vue'
 // 引入ts类型
 import type { permissionResponseType } from '~/api/acl/permission/type'
 // 菜单表格数组对象
@@ -188,9 +192,9 @@ const removePermission = async (row: permissionResponseType) => {
 }
 const handleOpenDialog = (row: permissionResponseType, str: string) => {
   if (row.type === 'menu') {
-    openDialog(row, str);
+    openDialog(row, str)
   } else if (row.type === 'btn') {
-    openBtnDialog(row, str);
+    openBtnDialog(row, str)
   }
 }
 // 添加|修改菜单按钮的回调
@@ -313,7 +317,7 @@ const getMenuListByLevel = async (visible: boolean) => {
 }
 const addOrUpdateBtnRef = ref()
 const openBtnDialog = (row: permissionResponseType, str: string) => {
-  if (!addOrUpdateBtnRef.value) return;
+  if (!addOrUpdateBtnRef.value) return
   addOrUpdateBtnRef.value.open(row, str)
 }
 const refresh = () => {

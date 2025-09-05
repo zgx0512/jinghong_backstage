@@ -1,18 +1,28 @@
 <template>
   <el-card>
-    <el-form :label-width="80" :model="spuInfoForm" :rules="rules" ref="spuInfoFormRef">
-      <el-form-item label="SPU名称" prop="spuName">
-        <el-input v-model="spuInfoForm.spuName"></el-input>
+    <el-form :label-width="100" :model="goodsInfoForm" :rules="rules" ref="goodsInfoFormRef">
+      <el-form-item label="商品名称" prop="goodsName">
+        <el-input v-model="goodsInfoForm.goods_name" class="w500"></el-input>
       </el-form-item>
       <el-form-item label="品牌">
-        <el-select placeholder="请选择品牌" v-model="spuInfoForm.tmId">
+        <el-select placeholder="请选择品牌" v-model="goodsInfoForm.tm_id" class="w260">
           <el-option v-for="tm in tmList" :key="tm.id" :label="tm.tmName" :value="tm.id" />
         </el-select>
       </el-form-item>
-      <el-form-item label="SPU描述" prop="description">
-        <el-input :rows="4" type="textarea" v-model="spuInfoForm.description" />
+      <el-form-item label="备注" prop="note">
+        <el-input :rows="2" type="textarea" v-model="goodsInfoForm.note" class="w500" />
       </el-form-item>
-      <el-form-item label="SPU图片" prop="imageList">
+      <el-form-item label="上架状态">
+        <el-select v-model="goodsInfoForm.is_onsale" class="w260">
+          <el-option
+            v-for="onsale in onsaleList"
+            :key="onsale.value"
+            :label="onsale.label"
+            :value="onsale.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="商品图片" prop="imageList">
         <el-upload
           v-model:file-list="fileList"
           action="/api/admin/product/fileUpload"
@@ -28,68 +38,256 @@
           <img w-full :src="dialogImageUrl" alt="Preview Image" />
         </el-dialog>
       </el-form-item>
-      <el-form-item label="销售属性">
-        <el-select
-          v-model="saleAttr"
-          :placeholder="placeholder"
-          :disabled="saleAttrList.length === 0"
-        >
-          <el-option
-            v-for="saleAttr in saleAttrList"
-            :key="saleAttr.id"
-            :label="saleAttr.name"
-            :value="`${saleAttr.name}+${saleAttr.id}`"
-          />
-        </el-select>
-        <el-button
-          type="primary"
-          icon="Plus"
-          style="margin-left: 10px"
-          :disabled="!saleAttr"
-          @click="addSaleAttr"
-          >添加销售属性</el-button
-        >
-        <el-table border style="margin-top: 10px; width: 100%" :data="spuInfoForm.spuSaleAttrList">
-          <el-table-column type="index" label="序号" width="80"></el-table-column>
-          <el-table-column prop="saleAttrName" label="属性名"></el-table-column>
-          <el-table-column label="属性值名称列表">
-            <template #default="{ row }">
-              <el-tag
-                class="mx-1"
-                closable
-                v-for="(spuSaleAttrValue, index) in row.spuSaleAttrValueList"
-                :key="spuSaleAttrValue.saleAttrValueName"
-                @close="handleClose(row.spuSaleAttrValueList, index)"
-                >{{ spuSaleAttrValue.saleAttrValueName }}</el-tag
-              >
-              <el-input
-                v-if="row.inputVisible"
-                ref="InputRef"
-                v-model="row.inputValue"
-                class="ml-1 w-20"
-                size="small"
-                @keyup.enter="handleInputConfirm(row)"
-                @blur="handleInputConfirm(row)"
-              />
-              <el-button v-else class="button-new-tag ml-1" size="small" @click="showInput(row)"
-                >添加</el-button
-              >
+      <el-form-item label="规格与价格" prop="sku">
+        <div style="width: 100%">
+          <div style="display: flex; gap: 20px; align-items: flex-start">
+            <table v-for="(group, index) in skuGroups" :key="group.uid" class="sku-table">
+              <thead>
+                <tr>
+                  <th>
+                    <el-tooltip
+                      :content="index === 0 ? '规格类型位置后移' : '规格类型位置前移'"
+                      placement="top"
+                    >
+                      <template #content
+                        >{{ index === 0 ? '规格类型位置后移' : '规格类型位置前移' }}<br />{{
+                          canMoveSpec && '请先选择规格类型'
+                        }}</template
+                      >
+                      <div>
+                        <el-icon
+                          v-if="index === 1 && skuGroups.length > 1"
+                          :class="['btn-move', { disabled: canMoveSpec }]"
+                          @click="moveSpec"
+                          ><CaretLeft
+                        /></el-icon>
+                        <el-icon
+                          v-else-if="index === 0 && skuGroups.length > 1"
+                          :class="['btn-move', { disabled: canMoveSpec }]"
+                          @click="moveSpec"
+                          ><CaretRight
+                        /></el-icon>
+                      </div>
+                    </el-tooltip>
+                  </th>
+                  <th>
+                    <div class="sku-type">
+                      <div><span class="span-required">*</span>规格类型:</div>
+                      <div class="sku-type-select">
+                        <el-select
+                          :model-value="group.spec_id"
+                          placeholder="请选择"
+                          style="width: 180px"
+                          class="sku-select"
+                          @change="handleChangeSpec($event, index)"
+                        >
+                          <el-option
+                            v-for="item in specList"
+                            :key="item.spec_id"
+                            :label="item.spec_name"
+                            :value="item.spec_id"
+                          />
+                        </el-select>
+                        <el-checkbox label="添加规格图片" class="sku-checkbox" />
+                      </div>
+                      <el-popover
+                        :visible="addCustomSpecVisible"
+                        title="添加自定义规格类型"
+                        placement="top"
+                        popper-class="custom-spec-popover"
+                      >
+                        <template #reference>
+                          <div
+                            style="color: #2e71ea; cursor: pointer"
+                            class="add-custom-spec"
+                            @click="addCustomSpecVisible = true"
+                          >
+                            自定义规格
+                          </div>
+                        </template>
+                        <el-input placeholder="请输入规格类型" v-model="customSpecName"></el-input>
+                        <div style="text-align: right; margin: 0; margin-top: 10px">
+                          <el-button size="small" text @click="cancelCustomSpec">取消</el-button>
+                          <el-button
+                            size="small"
+                            type="primary"
+                            :loading="addSpecLoading"
+                            @click="addSpec"
+                          >
+                            确定
+                          </el-button>
+                        </div>
+                      </el-popover>
+                    </div>
+                  </th>
+                  <th>
+                    <el-popconfirm
+                      class="box-item"
+                      width="220"
+                      title="确定删除此规格类型吗?"
+                      placement="top"
+                      confirm-button-text="确定"
+                      cancel-button-text="取消"
+                      @confirm="handleRemoveSkuGroup(index)"
+                    >
+                      <template #reference>
+                        <el-button :disabled="skuGroups.length <= 1" type="danger" text class="btn"
+                          >删除</el-button
+                        >
+                      </template>
+                    </el-popconfirm>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(sku, skuIndex) in group.list" :key="sku.uid">
+                  <td style="text-align: center; padding: 0 10px"><span>::</span></td>
+                  <td>
+                    <div class="sku-content-cell">
+                      <el-input
+                        v-model="sku.spec_value"
+                        placeholder="请输入规格值"
+                        @blur="handleBlur(index)"
+                      ></el-input>
+                    </div>
+                  </td>
+                  <td>
+                    <el-popconfirm
+                      class="box-item"
+                      width="220"
+                      title="确定删除此规格值吗?"
+                      placement="top"
+                      confirm-button-text="确定"
+                      cancel-button-text="取消"
+                      @confirm="handleRemoveSkuValue(index, skuIndex)"
+                    >
+                      <template #reference>
+                        <el-button type="primary" text class="btn">删除</el-button>
+                      </template>
+                    </el-popconfirm>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="width: 28px"></td>
+                  <td colspan="2" style="padding: 4px 0">
+                    <el-button
+                      icon="Plus"
+                      type="primary"
+                      text
+                      class="btn"
+                      :disabled="!group.spec_id"
+                      @click="handleAddSkuValue(group.spec_id, index)"
+                      >添加规格值</el-button
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <el-button
+            icon="Plus"
+            type="primary"
+            plain
+            class="add-sku-btn"
+            :disabled="skuGroups.length >= 2"
+            @click="handleAddSku"
+            >{{ `添加规格(${skuGroups.length}/2)` }}</el-button
+          >
+          <el-table
+            :data="skuTableList"
+            :span-method="objectSpanMethod"
+            border
+            class="sku-res-table"
+          >
+            <el-table-column
+              v-for="group in spec_list"
+              :key="group.id"
+              :prop="group.spec_value"
+              :label="group.spec_name"
+            >
+            </el-table-column>
+            <el-table-column prop="min_group_price" min-width="200">
+              <template #header>
+                <div class="sku-table-header">
+                  <div><span class="span-required">*</span>售价(元)</div>
+                  <el-button type="primary" text class="btn">批量修改</el-button>
+                </div>
+              </template>
+              <template #default="{ row }">
+                <el-input v-model="row.min_group_price" placeholder="请输入售价"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column prop="min_normal_price" min-width="200">
+              <template #header>
+                <div class="sku-table-header">
+                  <div><span class="span-required">*</span>划线价(元)</div>
+                  <el-button type="primary" text class="btn">批量修改</el-button>
+                </div>
+              </template>
+              <template #default="{ row }">
+                <el-input v-model="row.min_normal_price" placeholder="请输入划线价"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column prop="out_sku_sn" label="规格编码" min-width="200">
+              <template #default="{ row }">
+                <el-input v-model="row.out_sku_sn" placeholder="请输入规格编码"></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column prop="is_default" label="是否是默认规格" min-width="130">
+              <template #default="{ row }">
+                <el-switch
+                  v-model="row.is_default"
+                  :active-value="1"
+                  :inactive-value="0"
+                  size="small"
+                />
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-form-item>
+      <el-form-item label="服务">
+        <el-checkbox-group v-model="service_labels">
+          <el-checkbox label="极速售后" :value="1" />
+          <el-checkbox label="七天无理由退款" :value="2" />
+          <el-checkbox label="损坏包退" :value="3" />
+          <el-checkbox label="正品保证" :value="4" />
+        </el-checkbox-group>
+      </el-form-item>
+      <el-form-item label="已售件数">
+        <el-input v-model="goodsInfoForm.sales_num" placeholder="请输入整数" class="w260">
+          <template #suffix><span>件</span></template>
+        </el-input>
+      </el-form-item>
+      <el-form-item label="商品标签">
+        <el-checkbox-group v-model="goods_labels">
+          <el-checkbox :value="1">
+            <template #default>
+              <span class="goods-tag brown">精选</span>
             </template>
-          </el-table-column>
-          <el-table-column label="操作">
-            <template #default="{ row, $index }">
-              <el-button
-                icon="Delete"
-                type="danger"
-                size="small"
-                @click="removeSaleAttr(row, $index)"
-              ></el-button>
+          </el-checkbox>
+          <el-checkbox :value="2">
+            <template #default>
+              <span class="goods-tag red">热卖</span>
             </template>
-          </el-table-column>
-        </el-table>
+          </el-checkbox>
+          <el-checkbox :value="3">
+            <template #default>
+              <span class="goods-tag green">新品</span>
+            </template>
+          </el-checkbox>
+        </el-checkbox-group>
+      </el-form-item>
+      <el-form-item label="发货承诺">
+        <el-radio-group v-model="goodsInfoForm.delivery_promise_type">
+          <el-radio :value="1">当日发货</el-radio>
+          <el-radio :value="2">24小时发货</el-radio>
+          <el-radio :value="3">48小时发货</el-radio>
+          <el-radio :value="4">72小时发货</el-radio>
+        </el-radio-group>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="submit" :loading="loading">保存</el-button>
+        <el-button type="primary" @click="submit" :loading="loading">提交</el-button>
         <el-button @click="cancel">取消</el-button>
       </el-form-item>
     </el-form>
@@ -97,60 +295,397 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, defineEmits, nextTick, defineExpose } from 'vue'
+import { ref, onMounted, defineEmits, defineExpose, computed } from 'vue'
 // 引入接口函数
-import { reqSaleAttrInfo, reqAddOrUpdateSPU, reqSpuFormId } from '~/api/commodity/commodity_list'
-// 引入ts类型
 import {
-  spuResponseType,
-  saleAttrResponseType,
-  saleAttrValueResponseType,
-  imageResponseType
-} from '~/api/commodity/commodity_list/type'
+  reqSaleAttrInfo,
+  reqAddOrUpdateSPU,
+  reqSpuFormId,
+  reqSpecList,
+  reqAddSpec
+} from '~/api/commodity/commodity_list'
 // 引入接口函数
 import { reqTmList } from '~/api/commodity/trademark'
 // 引入ts类型
 import { tmResponseType, tmListResponseType } from '~/api/commodity/trademark/type'
 import { ElMessage } from 'element-plus'
+import type { TableColumnCtx } from 'element-plus'
 // 引入自定义校验规则
 import { imageListValidatePass } from '~/utils/validate'
 const emits = defineEmits(['cancel', 'submit'])
+const specList = ref<specResponseType[]>([])
+const goods_labels = ref<number[]>([])
 // 照片墙列表
 const fileList = ref([])
 // 品牌列表
 const tmList = ref<tmResponseType[]>([])
 // 基础销售属性列表
 const saleAttrList = ref<saleAttrResponseType[]>([])
-// 销售属性(名字+id)
-const saleAttr = ref<string>('')
 // spu表单的ref对象
-const spuInfoFormRef = ref()
+const goodsInfoFormRef = ref()
 // spu表单
-const spuInfoForm = ref<spuResponseType>({
-  category3Id: '',
-  id: '',
-  spuName: '',
-  description: '',
-  tmId: '',
-  spuImageList: [],
-  spuSaleAttrList: [],
-  spuPosterList: []
+const goodsInfoForm = ref<GoodsResponseType>({
+  category_id: '',
+  goods_id: '',
+  goods_name: '',
+  note: '',
+  sales_num: 0,
+  is_onsale: 1,
+  tm_id: '',
+  sku_list: [],
+  image_list: [],
+  service_labels: '',
+  goods_labels: '',
+  delivery_promise_type: 3
 })
+const skuGroups = ref<skuGroupResponseType[]>([])
+const handleAddSku = () => {
+  if (skuGroups.value.length >= 2) {
+    return
+  }
+  skuGroups.value.push(getEmptySkuGroup())
+}
+// sku表格列表
+const skuTableList = ref<skuTableResponseType[]>([])
+const spec_list = ref<skuTableGroupResponseType[]>([])
+const handleAddSkuValue = (id: any, index: number) => {
+  skuGroups.value[index].list.push({
+    uid: Date.now(),
+    spec_id: id as number,
+    spec_value: '',
+    sku_thumb_url: ''
+  })
+}
+const handleChangeSpec = (id: number | string, index: number) => {
+  const spec_name = specList.value.find((item1) => item1.spec_id === id)?.spec_name || ''
+  if (skuGroups.value.length > 1) {
+    // 有两个规格组，判断是否重复规格名
+    if (index === 0) {
+      // 修改第一个规格组，判断第二个规格组是否有重复的规格名
+      if (skuGroups.value[1].spec_name === spec_name) {
+        ElMessage.warning('此规格已存在!')
+        return
+      }
+    } else {
+      // 修改第二个规格组，判断第一个规格组是否有重复的规格名
+      if (skuGroups.value[0].spec_name === spec_name) {
+        ElMessage.warning('此规格已存在!')
+        return
+      }
+    }
+  }
+  skuGroups.value[index].spec_name = spec_name
+  skuGroups.value[index].spec_id = id as number
+  if (spec_list.value[index]) {
+    spec_list.value[index].spec_name = spec_name
+  } else {
+    if (index === 1) {
+      // 判断skuGroups[0]的list长度是否大于0
+      if (skuGroups.value[0].list.length > 0) {
+        // 大于0，则先不往spec_list.value添加数据
+        return
+      }
+    }
+    spec_list.value.push({
+      id: id as number,
+      spec_name: spec_name,
+      spec_value: `spec_name${index + 1}`
+    })
+  }
+}
+
+// 删除规格类型 - 修复版
+const handleRemoveSkuGroup = (index: number) => {
+  // 直接删除规格组和对应的spec_list项
+  skuGroups.value.splice(index, 1)
+  spec_list.value.splice(index, 1)
+
+  // 如果删除的是第一个规格组，需要更新剩余的规格组名称
+  if (index === 0 && spec_list.value.length > 0) {
+    spec_list.value[0].spec_value = 'spec_name1'
+  }
+
+  // 重新生成所有规格组合
+  const { allCombinations } = generateCombinations()
+
+  // 创建现有数据的映射，用于保留已有数据
+  const existingDataMap = new Map<string, any>()
+  skuTableList.value.forEach((item) => {
+    const key = `${item.spec_name1}-${item.spec_name2}`
+    existingDataMap.set(key, item)
+  })
+
+  // 创建新的表格数据，基于重新生成的组合
+  const newTableData: skuTableResponseType[] = []
+
+  allCombinations.forEach((combination) => {
+    const key = `${combination.spec_name1}-${combination.spec_name2}`
+    if (existingDataMap.has(key)) {
+      // 保留现有数据
+      newTableData.push(existingDataMap.get(key))
+    } else {
+      // 创建新数据行
+      newTableData.push({
+        uid: Date.now() + Math.random(),
+        min_group_price: '',
+        min_normal_price: '',
+        out_sku_sn: '',
+        is_default: 0,
+        spec_name1: combination.spec_name1,
+        spec_name2: combination.spec_name2
+      })
+    }
+  })
+
+  // 更新表格数据
+  skuTableList.value = newTableData
+
+  // 确保至少有一个默认规格
+  ensureDefaultSpec()
+}
+
+// 确保至少有一个默认规格
+const ensureDefaultSpec = () => {
+  const hasDefault = skuTableList.value.some((item) => item.is_default === 1)
+  if (!hasDefault && skuTableList.value.length > 0) {
+    skuTableList.value[0].is_default = 1
+  }
+}
+
+type specNameType = { spec_name1: string; spec_name2: string }
+
+// 辅助函数 1: 处理规格值检查与插入
+const handleSpecValueCheck = (index: number) => {
+  if (spec_list.value[index]?.spec_value !== `spec_name${index + 1}`) {
+    const newSpec = {
+      id: skuGroups.value[index].spec_id as number,
+      spec_name: skuGroups.value[index].spec_name as string,
+      spec_value: `spec_name${index + 1}`
+    }
+    spec_list.value.splice(index, 0, newSpec)
+  }
+}
+
+// 辅助函数 2: 过滤空值并处理规格组
+const filterAndHandleGroups = (index: number) => {
+  // 过滤掉规格组中的空值
+  const validGroups = skuGroups.value.map((group) => ({
+    ...group,
+    list: group.list.filter((item) => item.spec_value && item.spec_value.trim() !== '')
+  }))
+
+  // 处理空规格组
+  if (validGroups[index].list.length <= 0) {
+    spec_list.value.splice(index, 1)
+  }
+
+  // 处理相邻规格组
+  if (spec_list.value.length >= 2) {
+    if (index === 0 && validGroups[1].list.length <= 0) {
+      spec_list.value.splice(1, 1)
+    } else if (index === 1 && validGroups[0].list.length <= 0) {
+      spec_list.value.splice(0, 1)
+    }
+  }
+  // 返回过滤后的规格组
+  return validGroups.filter((group) => group.list.length > 0)
+}
+
+// 辅助函数 3: 生成规格组合
+const generateCombinations = (groups?: skuGroupResponseType[]) => {
+  // 如果没有传入参数，使用全局的skuGroups
+  const validGroups = groups || skuGroups.value
+
+  // 计算有效组合总数
+  let total = 0
+  if (validGroups.length === 1) {
+    total = validGroups[0].list.length
+  } else if (validGroups.length === 2) {
+    total = validGroups[0].list.length * validGroups[1].list.length
+  }
+
+  // 生成所有有效的规格组合
+  const allCombinations: specNameType[] = []
+
+  if (validGroups.length === 2) {
+    // 有两个规格组
+    for (let i = 0; i < validGroups[0].list.length; i++) {
+      for (let j = 0; j < validGroups[1].list.length; j++) {
+        allCombinations.push({
+          spec_name1: validGroups[0].list[i].spec_value,
+          spec_name2: validGroups[1].list[j].spec_value
+        })
+      }
+    }
+  } else if (validGroups.length === 1) {
+    // 一个规格组
+    const isFirstSpec = spec_list.value[0]?.spec_value === 'spec_name1'
+    for (let i = 0; i < validGroups[0].list.length; i++) {
+      allCombinations.push({
+        spec_name1: isFirstSpec ? validGroups[0].list[i].spec_value : '',
+        spec_name2: isFirstSpec ? '' : validGroups[0].list[i].spec_value
+      })
+    }
+  }
+
+  return { total, allCombinations }
+}
+
+// 定义现有数据的接口
+interface ExistingData {
+  min_group_price: string | number
+  min_normal_price: string | number
+  out_sku_sn: string
+  is_default: number
+}
+
+// 辅助函数 4: 保存现有数据
+const saveExistingData = () => {
+  const existingDataMap = new Map<string, ExistingData>()
+  let hasDefaultSpec = false
+
+  skuTableList.value.forEach((item) => {
+    const key = `${item.spec_name1}-${item.spec_name2}`
+    existingDataMap.set(key, {
+      min_group_price: item.min_group_price,
+      min_normal_price: item.min_normal_price,
+      out_sku_sn: item.out_sku_sn,
+      is_default: item.is_default
+    })
+
+    if (item.is_default === 1) {
+      hasDefaultSpec = true
+    }
+  })
+
+  return { existingDataMap, hasDefaultSpec }
+}
+// 辅助函数 5: 调整表格行数
+const adjustTableRows = (total: number) => {
+  const currentLength = skuTableList.value.length
+
+  if (currentLength < total) {
+    // 需要添加行
+    const needAdd = total - currentLength
+    for (let i = 0; i < needAdd; i++) {
+      skuTableList.value.push({
+        uid: Date.now() + i,
+        min_group_price: '',
+        min_normal_price: '',
+        out_sku_sn: '',
+        is_default: 0,
+        spec_name1: '',
+        spec_name2: ''
+      })
+    }
+  } else if (currentLength > total) {
+    // 需要删除行
+    skuTableList.value = skuTableList.value.slice(0, total)
+  }
+}
+
+// 辅助函数 6: 更新表格数据
+const updateTableData = (
+  allCombinations: specNameType[],
+  existingDataMap: Map<string, ExistingData>,
+  hasDefaultSpec: boolean
+) => {
+  skuTableList.value = skuTableList.value.map((item, idx) => {
+    if (idx < allCombinations.length) {
+      const combination = allCombinations[idx]
+      const key = `${combination.spec_name1}-${combination.spec_name2}`
+      const existingData = existingDataMap.get(key)
+
+      // 如果是第一条数据且没有默认规格，设置为默认规格
+      let is_default = existingData ? existingData.is_default : 0
+      if (idx === 0 && !hasDefaultSpec) {
+        is_default = 1
+      }
+
+      return {
+        ...item,
+        spec_name1: combination.spec_name1,
+        spec_name2: combination.spec_name2,
+        min_group_price: existingData ? existingData.min_group_price : '',
+        min_normal_price: existingData ? existingData.min_normal_price : '',
+        out_sku_sn: existingData ? existingData.out_sku_sn : '',
+        is_default
+      }
+    }
+    return item
+  })
+}
+
+const handleBlur = (index: number) => {
+  // 1. 处理规格值检查与插入
+  handleSpecValueCheck(index)
+  // 2. 过滤空值并处理规格组
+  const validGroups = filterAndHandleGroups(index)
+  // 3. 生成规格组合
+  const { total, allCombinations } = generateCombinations(validGroups)
+  // 4. 保存现有数据
+  const { existingDataMap, hasDefaultSpec } = saveExistingData()
+  // 5. 调整表格行数
+  adjustTableRows(total)
+  // 6. 更新表格数据
+  updateTableData(allCombinations, existingDataMap, hasDefaultSpec)
+}
+const handleRemoveSkuValue = (index: number, skuIndex: number) => {
+  // 获取要删除的规格值
+  const removedValue = skuGroups.value[index].list[skuIndex]
+  // 从规格组中删除该值
+  skuGroups.value[index].list.splice(skuIndex, 1)
+  // 检查规格组中是否还有其他值
+  if (skuGroups.value[index].list.length > 0) {
+    // 过滤掉包含被删除规格值的行
+    skuTableList.value = skuTableList.value.filter(
+      (row) => row[`spec_name${index + 1}` as keyof typeof row] !== removedValue.spec_value
+    )
+  } else {
+    skuTableList.value = skuTableList.value.map((row) => {
+      delete row[`spec_name${index + 1}` as keyof typeof row]
+      return row
+    })
+    spec_list.value.splice(index, 1)
+  }
+}
+const onsaleList = [
+  {
+    value: 1,
+    label: '上架中'
+  },
+  {
+    value: 0,
+    label: '已下架'
+  }
+]
+const service_labels = ref<number[]>([])
 // 控制放大图片对话框的显示与隐藏
 const dialogVisible = ref<boolean>(false)
 // 放大图片
 const dialogImageUrl = ref('')
 // 保存按钮加载效果
 const loading = ref<boolean>(false)
+// 获取一个空的规格组
+const getEmptySkuGroup = () => {
+  return {
+    uid: Date.now(),
+    spec_name: '',
+    useSpecThumb: false,
+    customVisible: false,
+    list: []
+  }
+}
 // 打开卡片的回调
-const open = async (row: spuResponseType, category3Id: number | string) => {
-  if (row.id) {
+const open = async (row: GoodsResponseType, category3Id: number | string) => {
+  getSpecList()
+  if (row.goods_id) {
     // 有id，是修改
     // 调用接口，获取当前spu的全部数据
-    const result = await reqSpuFormId(row.id)
+    const result = await reqSpuFormId(row.goods_id)
     if (result.code === 200) {
       // 赋值
-      spuInfoForm.value = result.data
+      goodsInfoForm.value = result.data
       // 照片墙数据
       fileList.value = result.data.spuImageList.map((item: imageResponseType) => {
         return {
@@ -158,7 +693,6 @@ const open = async (row: spuResponseType, category3Id: number | string) => {
           name: item.imgName
         }
       })
-      console.log(fileList.value)
       // 剩余销售属性列表
       saleAttrList.value = saleAttrList.value.filter((item) => {
         // 判断当前销售属性是否已经被选中了
@@ -167,21 +701,26 @@ const open = async (row: spuResponseType, category3Id: number | string) => {
     }
   } else {
     // 是添加，每次打开都清空上一次的文本框
-    spuInfoForm.value = {
-      category3Id: '',
-      id: '',
-      spuName: '',
-      description: '',
-      tmId: '',
-      spuImageList: [],
-      spuSaleAttrList: [],
-      spuPosterList: []
+    goodsInfoForm.value = {
+      category_id: '',
+      goods_id: '',
+      goods_name: '',
+      note: '',
+      sales_num: 0,
+      is_onsale: 1,
+      tm_id: '',
+      sku_list: [],
+      image_list: [],
+      service_labels: '',
+      goods_labels: '',
+      delivery_promise_type: 3
     }
+    skuGroups.value = [getEmptySkuGroup()]
   }
   // 提示语的动态变化
   placeholder.value =
     saleAttrList.value.length > 0 ? `还有${saleAttrList.value.length}未选择` : '已选完'
-  spuInfoForm.value.category3Id = category3Id
+  goodsInfoForm.value.category_id = category3Id
 }
 // 表单校验规则
 const rules = ref({
@@ -239,104 +778,20 @@ const beforeAvatarUpload = (rawFile: any) => {
   return true
 }
 const placeholder = ref<string>('')
-// 添加销售属性按钮的回调
-const addSaleAttr = () => {
-  // 将销售属性切成数组
-  const arr = saleAttr.value.split('+')
-  // 将当前销售属性添加到表格列表中
-  spuInfoForm.value.spuSaleAttrList?.push({
-    baseSaleAttrId: Number(arr[1]),
-    saleAttrName: arr[0],
-    spuSaleAttrValueList: [],
-    inputVisible: false,
-    inputValue: '',
-    name: ''
-  })
-  // 从销售属性列表中移除掉要添加的那一项
-  saleAttrList.value = saleAttrList.value.filter((item) => item.name !== arr[0])
-  // 清空saleAttrName
-  saleAttr.value = ''
-  // 动态判断下选择框要展示什么默认信息
-  placeholder.value =
-    saleAttrList.value.length > 0 ? `还有${saleAttrList.value.length}未选择` : '已选完'
-}
-// 文本框ref对象
-const InputRef = ref()
-// 添加属性值按钮的回调
-const showInput = (row: saleAttrResponseType) => {
-  row.inputVisible = true
-  nextTick(() => {
-    InputRef.value?.focus()
-  })
-}
-// 文本框失去焦点的回调
-const handleInputConfirm = (row: saleAttrResponseType) => {
-  if (!row.inputValue) {
-    // 提示用户属性值不能为空
-    ElMessage({
-      type: 'warning',
-      message: '属性值不能为空'
-    })
-    return
-  }
-  // 判断当前的属性值是否已经存在
-  const res = row.spuSaleAttrValueList?.some((item) => item.saleAttrValueName === row.inputValue)
-  if (res) {
-    // 存在，提示用户
-    ElMessage.warning('属性值已经存在')
-    return
-  }
-  row.spuSaleAttrValueList?.push({
-    baseSaleAttrId: row.baseSaleAttrId,
-    saleAttrName: row.saleAttrName,
-    saleAttrValueName: row.inputValue
-  })
-  row.inputVisible = false
-  row.inputValue = ''
-}
-// 删除属性值按钮的回调
-const handleClose = (row: saleAttrValueResponseType[], index: number) => {
-  // 删除对应的数据
-  row.splice(index, 1)
-}
-// 删除销售属性的回调
-const removeSaleAttr = (row: saleAttrResponseType, index: number) => {
-  spuInfoForm.value.spuSaleAttrList?.splice(index, 1)
-  saleAttrList.value.push({
-    name: row.saleAttrName as string
-  })
-  placeholder.value =
-    saleAttrList.value.length > 0 ? `还有${saleAttrList.value.length}未选择` : '已选完'
-}
 // 保存按钮的回调
 const submit = () => {
   // 表单校验
-  if (!spuInfoFormRef.value) return
-  spuInfoFormRef.value.validate(async (valid: boolean) => {
+  if (!goodsInfoFormRef.value) return
+  goodsInfoFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
       // 表单校验通过, 开启加载效果
       loading.value = true
-      // 整合要传给后台的数据
-      spuInfoForm.value.spuImageList = fileList.value.map((item: any) => {
-        return {
-          imgUrl: item.response ? item.response.data : item.url,
-          imgName: item.name
-        }
-      })
-      // 移除掉 inputValue 跟 inputVisible 跟 name
-      spuInfoForm.value.spuSaleAttrList = spuInfoForm.value.spuSaleAttrList?.map((item) => {
-        return {
-          baseSaleAttrId: item.baseSaleAttrId,
-          saleAttrName: item.saleAttrName,
-          spuSaleAttrValueList: item.spuSaleAttrValueList
-        }
-      })
-      const result = await reqAddOrUpdateSPU(spuInfoForm.value)
+      const result = await reqAddOrUpdateSPU(goodsInfoForm.value)
       if (result.code === 200) {
         // 添加|修改成功
         ElMessage.success('保存成功')
         // 通知父组件切换卡片
-        emits('submit', spuInfoForm.value.id)
+        emits('submit', goodsInfoForm.value.goods_id)
         // 关闭加载效果
         loading.value = false
       } else {
@@ -351,6 +806,156 @@ const submit = () => {
     }
   })
 }
+
+// 获取规格类型列表
+const getSpecList = async () => {
+  try {
+    const res = await reqSpecList()
+    specList.value = res.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+// 添加自定义规格弹出框控制
+const addCustomSpecVisible = ref<boolean>(false)
+// 规格类型文本框绑定值
+const customSpecName = ref<string>('')
+const addSpecLoading = ref(false)
+// 取消按钮点击
+const cancelCustomSpec = () => {
+  customSpecName.value = ''
+  addCustomSpecVisible.value = false
+}
+// 新增规格类型
+const addSpec = async () => {
+  try {
+    addSpecLoading.value = true
+    const data = {
+      spec_name: customSpecName.value
+    }
+    await reqAddSpec(data)
+    ElMessage.success('添加成功')
+  } catch (error) {
+    console.log(error)
+  } finally {
+    addSpecLoading.value = false
+    cancelCustomSpec()
+  }
+}
+
+interface SpanMethodProps {
+  row: skuTableResponseType
+  column: TableColumnCtx<skuTableResponseType>
+  rowIndex: number
+  columnIndex: number
+}
+
+const objectSpanMethod = ({ row, column, rowIndex, columnIndex }: SpanMethodProps) => {
+  // 只对第一列（尺码列）进行合并处理
+  if (columnIndex === 0) {
+    // 使用类型断言确保属性访问的安全性
+    const property = column.property as keyof typeof row
+    const currentRowValue = row[property]
+    const prevRowValue = skuTableList.value[rowIndex - 1]?.[property]
+
+    // 如果当前行与上一行的值相同，则隐藏当前单元格
+    if (rowIndex > 0 && currentRowValue === prevRowValue) {
+      return {
+        rowspan: 0,
+        colspan: 0
+      }
+    }
+
+    // 计算需要合并的行数
+    let rowspan = 1
+    for (let i = rowIndex + 1; i < skuTableList.value.length; i++) {
+      if (skuTableList.value[i][property] === currentRowValue) {
+        rowspan++
+      } else {
+        break
+      }
+    }
+
+    return {
+      rowspan: rowspan,
+      colspan: 1
+    }
+  }
+
+  // 其他列保持默认
+  return {
+    rowspan: 1,
+    colspan: 1
+  }
+}
+
+// 判断左右调换规格组的按钮是否可用
+const canMoveSpec = computed(() => {
+  return skuGroups.value.find((item) => !item.spec_name)
+})
+
+// 调换规格组位置
+const moveSpec = () => {
+  if (canMoveSpec.value) return
+  // 调换规格组位置
+  skuGroups.value.reverse()
+  spec_list.value = skuGroups.value.map((item, index) => {
+    return {
+      id: item.spec_id as number,
+      spec_name: item.spec_name as string,
+      spec_value: `spec_name${index + 1}`
+    }
+  })
+  // 创建映射以保存现有数据
+  const existingDataMap = new Map()
+  skuTableList.value.forEach((item) => {
+    const key = `${item.spec_name1}-${item.spec_name2}`
+    existingDataMap.set(key, {
+      min_group_price: item.min_group_price,
+      min_normal_price: item.min_normal_price,
+      out_sku_sn: item.out_sku_sn,
+      is_default: item.is_default
+    })
+  })
+  // 生成新的规格组合
+  const newCombinations = []
+  if (skuGroups.value.length === 2) {
+    for (let i = 0; i < skuGroups.value[0].list.length; i++) {
+      for (let j = 0; j < skuGroups.value[1].list.length; j++) {
+        newCombinations.push({
+          spec_name1: skuGroups.value[0].list[i].spec_value,
+          spec_name2: skuGroups.value[1].list[j].spec_value
+        })
+      }
+    }
+  }
+  // 创建新的表格数据
+  const newTableData = []
+  for (const combination of newCombinations) {
+    const key = `${combination.spec_name1}-${combination.spec_name2}`
+    const reverseKey = `${combination.spec_name2}-${combination.spec_name1}`
+
+    // 尝试获取现有数据
+    let existingData = existingDataMap.get(key)
+    if (!existingData) {
+      // 如果直接键找不到，尝试反向键（处理位置调换后的数据映射）
+      existingData = existingDataMap.get(reverseKey)
+    }
+    newTableData.push({
+      uid: Date.now() + Math.random(),
+      spec_name1: combination.spec_name1,
+      spec_name2: combination.spec_name2,
+      min_group_price: existingData?.min_group_price || '',
+      min_normal_price: existingData?.min_normal_price || '',
+      out_sku_sn: existingData?.out_sku_sn || '',
+      is_default: existingData?.is_default || 0
+    })
+  }
+  // 更新表格数据
+  skuTableList.value = newTableData
+  // 确保至少有一个默认规格
+  ensureDefaultSpec()
+}
 onMounted(() => {
   getTmList()
   getSaleAttrList()
@@ -360,4 +965,111 @@ defineExpose({
 })
 </script>
 
-<style lang="" scoped></style>
+<style lang="scss">
+.custom-spec-popover {
+  width: 210px !important;
+  .el-popover__title {
+    --el-popover-title-font-size: 14px;
+  }
+  .el-input__inner {
+    font-size: 13px;
+  }
+}
+</style>
+
+<style lang="scss" scoped>
+.sku-table {
+  margin-bottom: 15px;
+  font-size: 13px;
+  tr,
+  th,
+  td {
+    border: 1px solid #e8eaec;
+  }
+  thead {
+    th {
+      background-color: #fafafa;
+    }
+  }
+  .btn-move {
+    cursor: pointer;
+    color: #999;
+    &.disabled {
+      cursor: not-allowed;
+      color: #ddd;
+    }
+  }
+  .sku-type {
+    display: flex;
+    padding: 10px;
+    gap: 6px;
+    .sku-type-select {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      .sku-select {
+        :deep(.el-tooltip__trigger) {
+          font-size: 13px !important;
+        }
+      }
+      .sku-checkbox {
+        --el-checkbox-font-size: 13px;
+        // font-size: 13px
+      }
+    }
+    .add-custom-spec {
+      height: fit-content;
+    }
+  }
+  .sku-content-cell {
+    padding: 10px;
+  }
+}
+
+.add-sku-btn {
+  margin-bottom: 10px;
+}
+
+.span-required {
+  color: red;
+  margin-right: 4px;
+}
+
+.sku-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .el-button {
+    padding: 0;
+  }
+}
+
+.goods-tag {
+  padding: 0 8px;
+  height: 22px;
+  line-height: 23px;
+  background-color: #888;
+  color: white;
+  border-radius: 4px;
+  display: inline-block;
+  &.brown {
+    background-image: linear-gradient(45deg, #a14c2d, #461f0f);
+  }
+  &.red {
+    background-image: linear-gradient(45deg, #ff4a33, #d71616);
+  }
+  &.green {
+    background-image: linear-gradient(45deg, #41e04f, #05a208);
+  }
+}
+
+.btn {
+  &:hover {
+    background-color: transparent !important;
+  }
+}
+.sku-res-table {
+  width: 100%;
+  --el-font-size-base: 13px;
+}
+</style>

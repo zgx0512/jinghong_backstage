@@ -17,7 +17,12 @@
       <el-button type="primary" icon="Plus" :disabled="!category3Id" @click="open"
         >添加商品</el-button
       >
-      <tph-table :tableData="spuList" :tableHeadList="tableHeadList" :tableProp="tableProp" v-loading="loading">
+      <tph-table
+        :tableData="spuList"
+        :tableHeadList="tableHeadList"
+        :tableProp="tableProp"
+        v-loading="loading"
+      >
         <template #default="{ row }">
           <el-button
             type="success"
@@ -72,7 +77,12 @@
       ref="addOrUpdateSpuRef"
     ></addOrUpdateSpu>
     <!-- 添加Sku卡片 -->
-    <addOrUpdateSku v-if="showSpuData === 2" ref="addOrUpdateSkuRef" @cancel="cancel" @submit="submit"></addOrUpdateSku>
+    <addOrUpdateSku
+      v-if="showSpuData === 2"
+      ref="addOrUpdateSkuRef"
+      @cancel="cancel"
+      @submit="submit"
+    ></addOrUpdateSku>
     <!-- 查看sku对话框 -->
     <skuInfo ref="skuInfoRef"></skuInfo>
   </div>
@@ -83,16 +93,14 @@
 import category from '~/components/category.vue'
 import { ref, nextTick } from 'vue'
 // 引入接口函数
-import { reqSpuInfo, reqRemoveSpu } from '~/api/commodity/commodity_list'
+import { reqCommodityList, reqRemoveSpu } from '~/api/commodity/commodity_list'
 // 引入子组件
 import addOrUpdateSpu from './components/addOrUpdateSpu.vue'
 import addOrUpdateSku from './components/addOrUpdateSku.vue'
 import skuInfo from './components/skuInfo.vue'
-// 引入ts类型
-import { spuResponseType } from '~/api/commodity/commodity_list/type'
 import { ElMessage } from 'element-plus'
 // spu数据列表
-const spuList = ref<spuResponseType[]>([])
+const spuList = ref<GoodsResponseType[]>([])
 // 一级分类id
 const category1Id = ref<number | string>('')
 // 二级分类id
@@ -101,7 +109,7 @@ const category2Id = ref<number | string>('')
 const category3Id = ref<number | string>('')
 // spu表格基本属性
 const tableProp = {
-  index: true,
+  index: false,
   isZh: true
 }
 // spu表格的表头列表
@@ -114,17 +122,17 @@ const tableHeadList = [
   {
     label: '售价(元)',
     property: 'min_group_price',
-    width: '180'
+    width: '60'
   },
   {
     label: '销量',
     property: 'sales_num',
-    width: '180'
+    width: '60'
   },
   {
     label: '上架状态',
     property: 'is_onsale',
-    width: '180'
+    width: '100'
   },
   {
     label: '操作'
@@ -146,9 +154,9 @@ const addOrUpdateSpuRef = ref()
 const getSpuList = async () => {
   // 开启加载效果
   loading.value = true
-  const result = await reqSpuInfo(page.value, limit.value, category3Id.value)
+  const result = await reqCommodityList(page.value, limit.value, category3Id.value)
   if (result.code === 200) {
-    spuList.value = result.data.records
+    spuList.value = result.data.goods_list
     total.value = result.data.total
     // 关闭加载效果
     loading.value = false
@@ -174,7 +182,7 @@ const cancel = () => {
   showSpuData.value = 0
 }
 // 添加|修改spu按钮的回调
-const open = (row: spuResponseType) => {
+const open = (row: GoodsResponseType) => {
   showSpuData.value = 1
   nextTick(() => {
     addOrUpdateSpuRef.value?.open(row, category3Id.value)
@@ -203,7 +211,7 @@ const addSkuBtn = (id: number | string) => {
 // sku对话框的ref对象
 const skuInfoRef = ref()
 // 查看sku按钮的回调
-const openSku = (row: spuResponseType) => {
+const openSku = (row: GoodsResponseType) => {
   // 调用子组件暴露的函数
   nextTick(() => {
     skuInfoRef.value.open(row)
