@@ -139,49 +139,57 @@
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr v-for="(sku, skuIndex) in group.list" :key="sku.uid">
-                  <td style="text-align: center; padding: 0 10px"><span>::</span></td>
-                  <td>
-                    <div class="sku-content-cell">
-                      <el-input
-                        v-model="sku.spec_value"
-                        placeholder="请输入规格值"
-                        @blur="handleBlur(index)"
-                      ></el-input>
-                    </div>
-                  </td>
-                  <td>
-                    <el-popconfirm
-                      class="box-item"
-                      width="220"
-                      title="确定删除此规格值吗?"
-                      placement="top"
-                      confirm-button-text="确定"
-                      cancel-button-text="取消"
-                      @confirm="handleRemoveSkuValue(index, skuIndex)"
-                    >
-                      <template #reference>
-                        <el-button type="primary" text class="btn">删除</el-button>
-                      </template>
-                    </el-popconfirm>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="width: 28px"></td>
-                  <td colspan="2" style="padding: 4px 0">
-                    <el-button
-                      icon="Plus"
-                      type="primary"
-                      text
-                      class="btn"
-                      :disabled="!group.spec_id"
-                      @click="handleAddSkuValue(group.spec_id, index)"
-                      >添加规格值</el-button
-                    >
-                  </td>
-                </tr>
-              </tbody>
+              <!-- 
+                 v-model: 绑定要拖拽的数据
+                 tag: 渲染的容器标签，默认div​
+                 handle: 拖拽手柄选择器
+                 item-key: 每个拖拽项的唯一标识
+               -->
+              <draggable v-model="group.list" tag="tbody" item-key="uid" handle=".move" @end="onDragEnd">
+                <template #item="{ element, index: skuIndex }">
+                  <tr :key="element.uid">
+                    <td class="move"><span>::</span></td>
+                    <td>
+                      <div class="sku-content-cell">
+                        <el-input
+                          v-model="element.spec_value"
+                          placeholder="请输入规格值"
+                          @blur="handleBlur(index)"
+                        ></el-input>
+                      </div>
+                    </td>
+                    <td>
+                      <el-popconfirm
+                        class="box-item"
+                        width="220"
+                        title="确定删除此规格值吗?"
+                        placement="top"
+                        confirm-button-text="确定"
+                        cancel-button-text="取消"
+                        @confirm="handleRemoveSkuValue(index, skuIndex)"
+                      >
+                        <template #reference>
+                          <el-button type="primary" text class="btn">删除</el-button>
+                        </template>
+                      </el-popconfirm>
+                    </td>
+                  </tr>
+                </template>
+              </draggable>
+              <tr>
+                <td style="width: 28px"></td>
+                <td colspan="2" style="padding: 4px 0">
+                  <el-button
+                    icon="Plus"
+                    type="primary"
+                    text
+                    class="btn"
+                    :disabled="!group.spec_id"
+                    @click="handleAddSkuValue(group.spec_id, index)"
+                    >添加规格值</el-button
+                  >
+                </td>
+              </tr>
             </table>
           </div>
           <el-button
@@ -295,6 +303,7 @@
 </template>
 
 <script lang="ts" setup>
+import draggable from 'vuedraggable'
 import { ref, onMounted, defineEmits, defineExpose, computed } from 'vue'
 // 引入接口函数
 import {
@@ -312,6 +321,7 @@ import { ElMessage } from 'element-plus'
 import type { TableColumnCtx } from 'element-plus'
 // 引入自定义校验规则
 import { imageListValidatePass } from '~/utils/validate'
+import { el } from 'element-plus/es/locale'
 const emits = defineEmits(['cancel', 'submit'])
 const specList = ref<specResponseType[]>([])
 const goods_labels = ref<number[]>([])
@@ -956,6 +966,19 @@ const moveSpec = () => {
   // 确保至少有一个默认规格
   ensureDefaultSpec()
 }
+
+// 拖拽结束后的回调
+const onDragEnd = () => {
+  // 3. 生成规格组合
+  const { total, allCombinations } = generateCombinations(skuGroups.value)
+  // 4. 保存现有数据
+  const { existingDataMap, hasDefaultSpec } = saveExistingData()
+  // 5. 调整表格行数
+  adjustTableRows(total)
+  // 6. 更新表格数据
+  updateTableData(allCombinations, existingDataMap, hasDefaultSpec)
+}
+
 onMounted(() => {
   getTmList()
   getSaleAttrList()
@@ -990,6 +1013,11 @@ defineExpose({
     th {
       background-color: #fafafa;
     }
+  }
+  .move {
+    text-align: center;
+    padding: 0 10px;
+    cursor: move;
   }
   .btn-move {
     cursor: pointer;
