@@ -1,10 +1,10 @@
 <template>
   <el-card>
     <el-form :label-width="100" :model="goodsInfoForm" :rules="rules" ref="goodsInfoFormRef">
-      <el-form-item label="商品名称" prop="goodsName">
+      <el-form-item label="商品名称" prop="goods_name">
         <el-input v-model="goodsInfoForm.goods_name" class="w500"></el-input>
       </el-form-item>
-      <el-form-item label="品牌">
+      <el-form-item label="品牌" prop="tm_id">
         <el-select placeholder="请选择品牌" v-model="goodsInfoForm.tm_id" class="w260">
           <el-option v-for="tm in tmList" :key="tm.id" :label="tm.tmName" :value="tm.id" />
         </el-select>
@@ -12,7 +12,7 @@
       <el-form-item label="备注" prop="note">
         <el-input :rows="2" type="textarea" v-model="goodsInfoForm.note" class="w500" />
       </el-form-item>
-      <el-form-item label="上架状态">
+      <el-form-item label="上架状态" prop="is_onsale">
         <el-select v-model="goodsInfoForm.is_onsale" class="w260">
           <el-option
             v-for="onsale in onsaleList"
@@ -40,7 +40,7 @@
           <img w-full :src="dialogImageUrl" alt="Preview Image" />
         </el-dialog>
       </el-form-item>
-      <el-form-item label="规格与价格" prop="sku">
+      <el-form-item label="规格与价格" required>
         <div style="width: 100%">
           <div style="display: flex; gap: 20px; align-items: flex-start">
             <table v-for="(group, index) in skuGroups" :key="group.uid" class="sku-table">
@@ -90,7 +90,7 @@
                             :value="item.spec_id"
                           />
                         </el-select>
-                        <el-checkbox label="添加规格图片" class="sku-checkbox" />
+                        <!-- <el-checkbox label="添加规格图片" class="sku-checkbox" /> -->
                       </div>
                       <el-popover
                         :visible="addCustomSpecVisible"
@@ -230,7 +230,11 @@
                 </div>
               </template>
               <template #default="{ row }">
-                <el-input v-model="row.min_group_price" placeholder="请输入售价"></el-input>
+                <el-input
+                  :value="row.min_group_price"
+                  placeholder="请输入售价"
+                  @input="handleInput(row, 'min_group_price', $event)"
+                ></el-input>
               </template>
             </el-table-column>
             <el-table-column prop="min_normal_price" min-width="200">
@@ -241,7 +245,11 @@
                 </div>
               </template>
               <template #default="{ row }">
-                <el-input v-model="row.min_normal_price" placeholder="请输入划线价"></el-input>
+                <el-input
+                  :value="row.min_normal_price"
+                  placeholder="请输入划线价"
+                  @input="handleInput(row, 'min_group_price', $event)"
+                ></el-input>
               </template>
             </el-table-column>
             <el-table-column prop="out_sku_sn" label="规格编码" min-width="200">
@@ -256,6 +264,7 @@
                   :active-value="1"
                   :inactive-value="0"
                   size="small"
+                  @change="toggleDefaultSpec(row)"
                 />
               </template>
             </el-table-column>
@@ -263,20 +272,20 @@
         </div>
       </el-form-item>
       <el-form-item label="服务">
-        <el-checkbox-group v-model="service_labels">
+        <el-checkbox-group v-model="goodsInfoForm.service_labels">
           <el-checkbox label="极速售后" :value="1" />
           <el-checkbox label="七天无理由退款" :value="2" />
           <el-checkbox label="损坏包退" :value="3" />
           <el-checkbox label="正品保证" :value="4" />
         </el-checkbox-group>
       </el-form-item>
-      <el-form-item label="已售件数">
+      <el-form-item label="已售件数" prop="sales_num">
         <el-input v-model="goodsInfoForm.sales_num" placeholder="请输入整数" class="w260">
           <template #suffix><span>件</span></template>
         </el-input>
       </el-form-item>
       <el-form-item label="商品标签">
-        <el-checkbox-group v-model="goods_labels">
+        <el-checkbox-group v-model="goodsInfoForm.goods_labels">
           <el-checkbox :value="1">
             <template #default>
               <span class="goods-tag brown">精选</span>
@@ -294,7 +303,7 @@
           </el-checkbox>
         </el-checkbox-group>
       </el-form-item>
-      <el-form-item label="发货承诺">
+      <el-form-item label="发货承诺" prop="delivery_promise_type">
         <el-radio-group v-model="goodsInfoForm.delivery_promise_type">
           <el-radio :value="1">当日发货</el-radio>
           <el-radio :value="2">24小时发货</el-radio>
@@ -314,12 +323,7 @@
 import draggable from 'vuedraggable'
 import { ref, onMounted, defineEmits, defineExpose, computed } from 'vue'
 // 引入接口函数
-import {
-  reqAddOrUpdateSPU,
-  reqSpuFormId,
-  reqSpecList,
-  reqAddSpec
-} from '~/api/commodity/commodity_list'
+import { reqAddOrUpdateSPU, reqSpecList, reqAddSpec } from '~/api/commodity/commodity_list'
 // 引入接口函数
 import { reqTmList } from '~/api/commodity/trademark'
 // 引入ts类型
@@ -336,13 +340,10 @@ const uploadHeaders = {
 }
 const emits = defineEmits(['cancel', 'submit'])
 const specList = ref<specResponseType[]>([])
-const goods_labels = ref<number[]>([])
 // 照片墙列表
 const fileList = ref([])
 // 品牌列表
 const tmList = ref<tmResponseType[]>([])
-// 基础销售属性列表
-const saleAttrList = ref<saleAttrResponseType[]>([])
 // spu表单的ref对象
 const goodsInfoFormRef = ref()
 // spu表单
@@ -351,13 +352,13 @@ const goodsInfoForm = ref<GoodsResponseType>({
   goods_id: '',
   goods_name: '',
   note: '',
-  sales_num: 0,
+  sales_num: '',
   is_onsale: 1,
   tm_id: '',
   sku_list: [],
   image_list: [],
-  service_labels: '',
-  goods_labels: '',
+  service_labels: [],
+  goods_labels: [],
   delivery_promise_type: 3
 })
 const skuGroups = ref<skuGroupResponseType[]>([])
@@ -416,7 +417,7 @@ const handleChangeSpec = (id: number | string, index: number) => {
   }
 }
 
-// 删除规格类型 - 修复版
+// 删除规格类型
 const handleRemoveSkuGroup = (index: number) => {
   // 直接删除规格组和对应的spec_list项
   skuGroups.value.splice(index, 1)
@@ -681,7 +682,6 @@ const onsaleList = [
     label: '已下架'
   }
 ]
-const service_labels = ref<number[]>([])
 // 控制放大图片对话框的显示与隐藏
 const dialogVisible = ref<boolean>(false)
 // 放大图片
@@ -701,55 +701,41 @@ const getEmptySkuGroup = () => {
 // 打开卡片的回调
 const open = async (row: GoodsResponseType, category3Id: number | string) => {
   getSpecList()
-  if (row.goods_id) {
-    // 有id，是修改
-    // 调用接口，获取当前spu的全部数据
-    const result = await reqSpuFormId(row.goods_id)
-    if (result.code === 200) {
-      // 赋值
-      goodsInfoForm.value = result.data
-      // 照片墙数据
-      fileList.value = result.data.spuImageList.map((item: imageResponseType) => {
-        return {
-          url: item.imgUrl,
-          name: item.imgName
-        }
-      })
-      // 剩余销售属性列表
-      saleAttrList.value = saleAttrList.value.filter((item) => {
-        // 判断当前销售属性是否已经被选中了
-        return !result.data.spuSaleAttrList.some((item1: any) => item.name === item1.saleAttrName)
-      })
-    }
-  } else {
-    // 是添加，每次打开都清空上一次的文本框
-    goodsInfoForm.value = {
-      category_id: '',
-      goods_id: '',
-      goods_name: '',
-      note: '',
-      sales_num: 0,
-      is_onsale: 1,
-      tm_id: '',
-      sku_list: [],
-      image_list: [],
-      service_labels: '',
-      goods_labels: '',
-      delivery_promise_type: 3
-    }
-    skuGroups.value = [getEmptySkuGroup()]
+  goodsInfoForm.value.category_id = category3Id
+  if (row) {
+    goodsInfoForm.value.goods_id = row.goods_id
+    goodsInfoForm.value.goods_name = row.goods_name
+    goodsInfoForm.value.tm_id = row.tm_id
+    goodsInfoForm.value.is_onsale = row.is_onsale
   }
 }
 // 表单校验规则
 const rules = ref({
-  spuName: { required: true, message: 'SPU名称不能为空', trigger: 'blur' },
+  goods_name: { required: true, message: '商品名称不能为空', trigger: 'blur' },
+  tm_id: { required: true, message: '商品品牌不能为空', trigger: 'change' },
+  is_onsale: { required: true, message: '商品上架状态不能为空', trigger: 'change' },
   description: { required: true, message: 'SPU描述不能为空', trigger: 'blur' },
-  imageList: {
-    required: true,
-    validator: (e1: any, e2: any, e3: any) =>
-      imageListValidatePass(e1, e2, e3, fileList.value.length),
-    trigger: 'blur'
-  }
+  // imageList: {
+  //   required: true,
+  //   validator: (e1: any, e2: any, e3: any) =>
+  //     imageListValidatePass(e1, e2, e3, fileList.value.length),
+  //   trigger: 'blur'
+  // },
+  sales_num: [
+    { required: true, message: '商品销量不能为空', trigger: 'blur' },
+    {
+      validator: (rule: any, value: string, callback: any) => {
+        const reg = /^(0|[1-9]\d*)$/ // 正则表达式：匹配非负整数（0 或正整数）
+        if (!value || reg.test(value)) {
+          callback() // 校验通过
+        } else {
+          callback(new Error('商品销量只能是非负整数')) // 校验失败
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
+  delivery_promise_type: { required: true, message: '发货承诺不能为空', trigger: 'change' }
 })
 // 获取品牌数据的接口
 const getTmList = async () => {
@@ -765,6 +751,7 @@ const getTmList = async () => {
 }
 // 取消按钮的回调
 const cancel = () => {
+  // goodsInfoFormRef.value.resetFields()
   emits('cancel')
 }
 // 点击已上传图片放大icon的回调
@@ -774,7 +761,7 @@ const handlePictureCardPreview = (uploadFile: any) => {
 }
 // 图片上传前的回调
 const beforeAvatarUpload = (rawFile: any) => {
-  const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+  const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
   if (!validImageTypes.includes(rawFile.type)) {
     ElMessage.error('图片只能是jpg、png、jpeg、gif格式')
     return false
@@ -791,19 +778,57 @@ const submit = () => {
   if (!goodsInfoFormRef.value) return
   goodsInfoFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
-      // 表单校验通过, 开启加载效果
-      loading.value = true
-      const result = await reqAddOrUpdateSPU(goodsInfoForm.value)
-      if (result.code === 200) {
-        // 添加|修改成功
-        ElMessage.success('保存成功')
-        // 通知父组件切换卡片
-        emits('submit', goodsInfoForm.value.goods_id)
-        // 关闭加载效果
-        loading.value = false
-      } else {
-        // 保存失败
-        ElMessage.error(result.data)
+      try {
+        // 表单校验通过, 开启加载效果
+        loading.value = true
+        // 整合提交参数
+        const data: GoodsResponseType = { ...goodsInfoForm.value }
+        if (data.service_labels && data.service_labels.length > 0) {
+          data.service_labels = (data.service_labels as number[]).join(',')
+        }
+        if (data.goods_labels && data.goods_labels.length > 0) {
+          data.goods_labels = (data.goods_labels as number[]).join(',')
+        }
+        data.sku_list = skuTableList.value.map((item) => {
+          const spec_list: skuTableGroupResponseType[] = []
+          spec_list.push({
+            spec_id: skuGroups.value[0].spec_id as number,
+            spec_name: skuGroups.value[0].spec_name as string,
+            spec_value: item.spec_name1
+          })
+          if (skuGroups.value.length > 1) {
+            spec_list.push({
+              spec_id: skuGroups.value[1].spec_id as number,
+              spec_name: skuGroups.value[1].spec_name as string,
+              spec_value: item.spec_name2
+            })
+          }
+          return {
+            is_default: item.is_default,
+            min_group_price: item.min_group_price,
+            min_normal_price: item.min_normal_price,
+            out_sku_sn: item.out_sku_sn, // 规格编码
+            spec: spec_list
+          }
+        })
+        return
+        const result = await reqAddOrUpdateSPU(goodsInfoForm.value)
+        if (result.code === 200) {
+          // 添加|修改成功
+          ElMessage.success('保存成功')
+          // 通知父组件切换卡片
+          emits('submit', goodsInfoForm.value.goods_id)
+          // 关闭加载效果
+          loading.value = false
+        } else {
+          // 保存失败
+          ElMessage.error(result.data)
+          // 关闭加载效果
+          loading.value = false
+        }
+      } catch (error) {
+        console.log(error)
+      } finally {
         // 关闭加载效果
         loading.value = false
       }
@@ -974,6 +999,41 @@ const onDragEnd = () => {
   adjustTableRows(total)
   // 6. 更新表格数据
   updateTableData(allCombinations, existingDataMap, hasDefaultSpec)
+}
+
+// 切换默认规格
+const toggleDefaultSpec = (row: skuTableResponseType) => {
+  // 排他思想，将所有的default到置为false
+  skuTableList.value.forEach((item) => {
+    item.is_default = 0
+  })
+  row.is_default = 1
+}
+
+type PriceType = 'min_group_price' | 'min_normal_price'
+const handleInput = (row: skuTableResponseType, type: PriceType, value: string) => {
+  const reg = /^(0|[1-9]\d*)(\.\d{1,2})?$/ // 匹配正整数或最多两位小数
+  if (reg.test(value)) {
+    // 如果输入值合法
+    const numValue = parseFloat(value)
+    if (numValue >= 0.01) {
+      row[type] = value // 更新到行数据
+      if (type === 'min_normal_price' && row.min_group_price) {
+        if (row.min_normal_price < row.min_group_price) {
+          ElMessage.warning('划线价不能小于售价') // 提示用户
+          row.min_normal_price = ''
+        }
+      }
+    } else {
+      ElMessage.warning('输入值不能小于0.01') // 提示用户
+      row.min_group_price = '' // 清空非法值
+      return
+    }
+  } else {
+    ElMessage.warning('请输入正数，最多两位小数') // 提示用户
+    row.min_group_price = '' // 清空非法值
+    return
+  }
 }
 
 onMounted(() => {

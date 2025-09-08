@@ -50,18 +50,14 @@ interface imageResponseType {
 }
 
 interface ISku {
-  sku_id: number
-  sku_name: string
-  sku_thumb_url: string // 规格图片
-  min_group_price: number // 最低价
-  min_normal_price: number // 划线价
+  sku_id?: number
+  min_group_price: number | string // 最低价
+  min_normal_price: number | string // 划线价
   is_default: number // 是否默认规格
-  stock_num: number // 库存
   spec: {
-    spec_id: number
+    spec_id?: number | string
     spec_name: string
     spec_value: string
-    is_add_thumb: number // 是否添加图片
   }[]
 }
 
@@ -76,12 +72,12 @@ interface GoodsResponseType {
   category_id?: number | string
   is_onsale: number // 上架状态
   is_delete?: number // 删除状态
-  sales_num: number // 销量
+  sales_num: number | string // 销量
   goods_thumbnail_url?: string // 商品主图
   image_list: string[]
   sku_list: ISku[]
-  service_labels: string
-  goods_labels: string
+  service_labels: string | number[]
+  goods_labels: string | number[]
   delivery_promise_type: number
   create_time?: Date
   update_time?: Date
@@ -192,7 +188,8 @@ interface skuTableResponseType {
 }
 
 interface skuTableGroupResponseType {
-  id: number | string
+  spec_id?: number | string
+  id?: number | string
   spec_name: string
   spec_value: string
 }
