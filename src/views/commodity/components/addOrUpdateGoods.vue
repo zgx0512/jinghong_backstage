@@ -25,8 +25,10 @@
       <el-form-item label="商品图片" prop="imageList">
         <el-upload
           v-model:file-list="fileList"
-          action="/api/admin/product/fileUpload"
+          :headers="uploadHeaders"
+          :action="`${env.VITE_BASE_URL}/upload`"
           list-type="picture-card"
+          multiple
           :on-preview="handlePictureCardPreview"
           :before-upload="beforeAvatarUpload"
         >
@@ -145,7 +147,13 @@
                  handle: 拖拽手柄选择器
                  item-key: 每个拖拽项的唯一标识
                -->
-              <draggable v-model="group.list" tag="tbody" item-key="uid" handle=".move" @end="onDragEnd">
+              <draggable
+                v-model="group.list"
+                tag="tbody"
+                item-key="uid"
+                handle=".move"
+                @end="onDragEnd"
+              >
                 <template #item="{ element, index: skuIndex }">
                   <tr :key="element.uid">
                     <td class="move"><span>::</span></td>
@@ -307,7 +315,6 @@ import draggable from 'vuedraggable'
 import { ref, onMounted, defineEmits, defineExpose, computed } from 'vue'
 // 引入接口函数
 import {
-  reqSaleAttrInfo,
   reqAddOrUpdateSPU,
   reqSpuFormId,
   reqSpecList,
@@ -321,7 +328,12 @@ import { ElMessage } from 'element-plus'
 import type { TableColumnCtx } from 'element-plus'
 // 引入自定义校验规则
 import { imageListValidatePass } from '~/utils/validate'
-import { el } from 'element-plus/es/locale'
+import { getToken } from '~/utils/token'
+// 引入环境变量
+const env = import.meta.env
+const uploadHeaders = {
+  Authorization: `Bearer ${getToken()}`
+}
 const emits = defineEmits(['cancel', 'submit'])
 const specList = ref<specResponseType[]>([])
 const goods_labels = ref<number[]>([])
@@ -727,10 +739,6 @@ const open = async (row: GoodsResponseType, category3Id: number | string) => {
     }
     skuGroups.value = [getEmptySkuGroup()]
   }
-  // 提示语的动态变化
-  placeholder.value =
-    saleAttrList.value.length > 0 ? `还有${saleAttrList.value.length}未选择` : '已选完'
-  goodsInfoForm.value.category_id = category3Id
 }
 // 表单校验规则
 const rules = ref({
@@ -745,20 +753,14 @@ const rules = ref({
 })
 // 获取品牌数据的接口
 const getTmList = async () => {
-  // 调用接口
-  const result: tmListResponseType = await reqTmList()
-  if (result.code === 200) {
-    tmList.value = result.data
-  }
-}
-// 获取基础销售属性
-const getSaleAttrList = async () => {
-  // 调用接口
-  const result = await reqSaleAttrInfo()
-  if (result.code === 200) {
-    saleAttrList.value = result.data
-    placeholder.value =
-      saleAttrList.value.length > 0 ? `还有${saleAttrList.value.length}未选择` : '已选完'
+  try {
+    // 调用接口
+    const result: tmListResponseType = await reqTmList()
+    if (result.code === 200) {
+      tmList.value = result.data
+    }
+  } catch (error) {
+    console.log(error)
   }
 }
 // 取消按钮的回调
@@ -772,12 +774,8 @@ const handlePictureCardPreview = (uploadFile: any) => {
 }
 // 图片上传前的回调
 const beforeAvatarUpload = (rawFile: any) => {
-  if (
-    rawFile.type !== 'image/jpeg' &&
-    rawFile.type !== 'image/jpg' &&
-    rawFile.type !== 'image/png' &&
-    rawFile.type !== 'image/gif'
-  ) {
+  const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+  if (!validImageTypes.includes(rawFile.type)) {
     ElMessage.error('图片只能是jpg、png、jpeg、gif格式')
     return false
   }
@@ -787,7 +785,6 @@ const beforeAvatarUpload = (rawFile: any) => {
   }
   return true
 }
-const placeholder = ref<string>('')
 // 保存按钮的回调
 const submit = () => {
   // 表单校验
@@ -981,7 +978,6 @@ const onDragEnd = () => {
 
 onMounted(() => {
   getTmList()
-  getSaleAttrList()
 })
 defineExpose({
   open

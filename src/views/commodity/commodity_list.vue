@@ -70,12 +70,12 @@
       />
     </el-card>
     <!-- 添加|修改SPU卡片 -->
-    <addOrUpdateSpu
+    <addOrUpdateGoods
       v-if="showSpuData === 1"
       @cancel="cancel"
       @submit="submit"
       ref="addOrUpdateSpuRef"
-    ></addOrUpdateSpu>
+    ></addOrUpdateGoods>
     <!-- 添加Sku卡片 -->
     <addOrUpdateSku
       v-if="showSpuData === 2"
@@ -95,7 +95,7 @@ import { ref, nextTick } from 'vue'
 // 引入接口函数
 import { reqCommodityList, reqRemoveSpu } from '~/api/commodity/commodity_list'
 // 引入子组件
-import addOrUpdateSpu from './components/addOrUpdateSpu.vue'
+import addOrUpdateGoods from './components/addOrUpdateGoods.vue'
 import addOrUpdateSku from './components/addOrUpdateSku.vue'
 import skuInfo from './components/skuInfo.vue'
 import { ElMessage } from 'element-plus'
