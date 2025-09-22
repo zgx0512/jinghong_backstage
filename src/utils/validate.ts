@@ -92,6 +92,6 @@ export const imageListValidatePass = (rule: any, value: any, callback: any, len:
     callback()
   } else {
     // 提示用户
-    callback(new Error('SPU图片不能为空'))
+    callback(new Error('商品图片不能为空'))
   }
 }

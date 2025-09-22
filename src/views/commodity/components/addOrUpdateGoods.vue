@@ -184,20 +184,22 @@
                   </tr>
                 </template>
               </draggable>
-              <tr>
-                <td style="width: 28px"></td>
-                <td colspan="2" style="padding: 4px 0">
-                  <el-button
-                    icon="Plus"
-                    type="primary"
-                    text
-                    class="btn"
-                    :disabled="!group.spec_id"
-                    @click="handleAddSkuValue(group.spec_id, index)"
-                    >添加规格值</el-button
-                  >
-                </td>
-              </tr>
+              <tbody>
+                <tr>
+                  <td style="width: 28px"></td>
+                  <td colspan="2" style="padding: 4px 0">
+                    <el-button
+                      icon="Plus"
+                      type="primary"
+                      text
+                      class="btn"
+                      :disabled="!group.spec_id"
+                      @click="handleAddSkuValue(group.spec_id, index)"
+                      >添加规格值</el-button
+                    >
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
           <el-button
@@ -231,9 +233,10 @@
               </template>
               <template #default="{ row }">
                 <el-input
-                  :value="row.min_group_price"
+                  v-model="row.min_group_price"
                   placeholder="请输入售价"
                   @input="handleInput(row, 'min_group_price', $event)"
+                  @change="handlePriceChange(row, 'min_group_price')"
                 ></el-input>
               </template>
             </el-table-column>
@@ -246,9 +249,10 @@
               </template>
               <template #default="{ row }">
                 <el-input
-                  :value="row.min_normal_price"
+                  v-model="row.min_normal_price"
                   placeholder="请输入划线价"
-                  @input="handleInput(row, 'min_group_price', $event)"
+                  @input="handleInput(row, 'min_normal_price', $event)"
+                  @change="handlePriceChange(row, 'min_normal_price')"
                 ></el-input>
               </template>
             </el-table-column>
@@ -323,7 +327,7 @@
 import draggable from 'vuedraggable'
 import { ref, onMounted, defineEmits, defineExpose, computed } from 'vue'
 // 引入接口函数
-import { reqAddOrUpdateSPU, reqSpecList, reqAddSpec } from '~/api/commodity/commodity_list'
+import { reqAddOrUpdateGoods, reqSpecList, reqAddSpec } from '~/api/commodity/commodity_list'
 // 引入接口函数
 import { reqTmList } from '~/api/commodity/trademark'
 // 引入ts类型
@@ -402,19 +406,30 @@ const handleChangeSpec = (id: number | string, index: number) => {
   if (spec_list.value[index]) {
     spec_list.value[index].spec_name = spec_name
   } else {
-    if (index === 1) {
-      // 判断skuGroups[0]的list长度是否大于0
-      if (skuGroups.value[0].list.length > 0) {
-        // 大于0，则先不往spec_list.value添加数据
-        return
-      }
-    }
     spec_list.value.push({
       id: id as number,
       spec_name: spec_name,
       spec_value: `spec_name${index + 1}`
     })
   }
+
+  // 重新生成表格数据以保持默认规格状态
+  regenerateTableData()
+}
+
+// 新增函数：重新生成表格数据
+const regenerateTableData = () => {
+  // 保存现有数据
+  const { existingDataMap, hasDefaultSpec } = saveExistingData()
+
+  // 生成新的组合
+  const { total, allCombinations } = generateCombinations()
+
+  // 调整表格行数
+  adjustTableRows(total)
+
+  // 更新表格数据
+  updateTableData(allCombinations, existingDataMap, hasDefaultSpec)
 }
 
 // 删除规格类型
@@ -698,11 +713,14 @@ const getEmptySkuGroup = () => {
     list: []
   }
 }
+// 是否是编辑商品
+const isEdit = ref<boolean>(false)
 // 打开卡片的回调
 const open = async (row: GoodsResponseType, category3Id: number | string) => {
   getSpecList()
   goodsInfoForm.value.category_id = category3Id
   if (row) {
+    isEdit.value = true
     goodsInfoForm.value.goods_id = row.goods_id
     goodsInfoForm.value.goods_name = row.goods_name
     goodsInfoForm.value.tm_id = row.tm_id
@@ -712,15 +730,15 @@ const open = async (row: GoodsResponseType, category3Id: number | string) => {
 // 表单校验规则
 const rules = ref({
   goods_name: { required: true, message: '商品名称不能为空', trigger: 'blur' },
-  tm_id: { required: true, message: '商品品牌不能为空', trigger: 'change' },
-  is_onsale: { required: true, message: '商品上架状态不能为空', trigger: 'change' },
+  tm_id: { required: true, message: '商品品牌不能为空', trigger: 'blur' },
+  is_onsale: { required: true, message: '商品上架状态不能为空', trigger: 'blur' },
   description: { required: true, message: 'SPU描述不能为空', trigger: 'blur' },
-  // imageList: {
-  //   required: true,
-  //   validator: (e1: any, e2: any, e3: any) =>
-  //     imageListValidatePass(e1, e2, e3, fileList.value.length),
-  //   trigger: 'blur'
-  // },
+  imageList: {
+    required: true,
+    validator: (e1: any, e2: any, e3: any) =>
+      imageListValidatePass(e1, e2, e3, fileList.value.length),
+    trigger: 'blur'
+  },
   sales_num: [
     { required: true, message: '商品销量不能为空', trigger: 'blur' },
     {
@@ -772,12 +790,52 @@ const beforeAvatarUpload = (rawFile: any) => {
   }
   return true
 }
+
+// 验证售价和划线价
+const validatePrices = () => {
+  // 检查是否有SKU数据
+  if (skuTableList.value.length === 0) {
+    return {
+      valid: false,
+      message: '请先添加规格信息'
+    }
+  }
+  // 验证每个SKU的售价和划线价是否为空
+  for (let i = 0; i < skuTableList.value.length; i++) {
+    const item = skuTableList.value[i]
+    // 检查售价
+    if (!item.min_group_price || item.min_group_price === '') {
+      return {
+        valid: false,
+        message: `第${i + 1}行规格的售价不能为空`
+      }
+    }
+    // 检查划线价
+    if (!item.min_normal_price || item.min_normal_price === '') {
+      return {
+        valid: false,
+        message: `第${i + 1}行规格的划线价不能为空`
+      }
+    }
+  }
+  return {
+    valid: true,
+    message: ''
+  }
+}
 // 保存按钮的回调
 const submit = () => {
   // 表单校验
   if (!goodsInfoFormRef.value) return
   goodsInfoFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
+      // 验证售价和划线价
+      const priceValidation = validatePrices()
+      if (!priceValidation.valid) {
+        ElMessage.warning(priceValidation.message)
+        return
+      }
+
       try {
         // 表单校验通过, 开启加载效果
         loading.value = true
@@ -804,6 +862,7 @@ const submit = () => {
             })
           }
           return {
+            sku_id: isEdit ? item.sku_id : 0,
             is_default: item.is_default,
             min_group_price: item.min_group_price,
             min_normal_price: item.min_normal_price,
@@ -811,8 +870,7 @@ const submit = () => {
             spec: spec_list
           }
         })
-        return
-        const result = await reqAddOrUpdateSPU(goodsInfoForm.value)
+        const result = await reqAddOrUpdateGoods(data)
         if (result.code === 200) {
           // 添加|修改成功
           ElMessage.success('保存成功')
@@ -1013,26 +1071,38 @@ const toggleDefaultSpec = (row: skuTableResponseType) => {
 type PriceType = 'min_group_price' | 'min_normal_price'
 const handleInput = (row: skuTableResponseType, type: PriceType, value: string) => {
   const reg = /^(0|[1-9]\d*)(\.\d{1,2})?$/ // 匹配正整数或最多两位小数
+
+  // 允许空值或正在输入的状态（如只输入了小数点）
+  if (value === '' || value === '0.' || /^\d+\.$/.test(value)) {
+    return // 允许这些中间状态
+  }
+
   if (reg.test(value)) {
     // 如果输入值合法
     const numValue = parseFloat(value)
-    if (numValue >= 0.01) {
-      row[type] = value // 更新到行数据
-      if (type === 'min_normal_price' && row.min_group_price) {
-        if (row.min_normal_price < row.min_group_price) {
-          ElMessage.warning('划线价不能小于售价') // 提示用户
-          row.min_normal_price = ''
-        }
-      }
-    } else {
-      ElMessage.warning('输入值不能小于0.01') // 提示用户
-      row.min_group_price = '' // 清空非法值
+    if (numValue < 0.01) {
+      ElMessage.warning('输入值不能小于0.01')
+      row[type] = '' // 清空非法值
       return
     }
   } else {
-    ElMessage.warning('请输入正数，最多两位小数') // 提示用户
-    row.min_group_price = '' // 清空非法值
+    ElMessage.warning('请输入正整数，最多两位小数')
+    row[type] = '' // 清空非法值
     return
+  }
+}
+
+// 处理价格变化事件（失去焦点时触发）
+const handlePriceChange = (row: skuTableResponseType, type: PriceType) => {
+  // 只在划线价变化时检查价格关系
+  if (type === 'min_normal_price' && row.min_group_price && row.min_normal_price) {
+    const groupPrice = parseFloat(row.min_group_price.toString())
+    const normalPrice = parseFloat(row.min_normal_price.toString())
+
+    if (normalPrice < groupPrice) {
+      ElMessage.warning('划线价不能小于售价')
+      row.min_normal_price = '' // 清空非法值
+    }
   }
 }
 

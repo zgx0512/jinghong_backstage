@@ -35,7 +35,7 @@ export const reqSaleAttrInfo = () => {
 }
 
 // 新增|编辑SPU的接口
-export const reqAddOrUpdateSPU = (data: GoodsResponseType) => {
+export const reqAddOrUpdateGoods = (data: GoodsResponseType) => {
   if (data.goods_id) {
     // 存在，是修改
     return request.post<nullResponseType, any>(API.UPDATESPU_URL, data)

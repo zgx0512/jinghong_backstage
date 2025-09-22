@@ -178,6 +178,7 @@ interface skuGroupResponseType {
 
 // sku表格组的ts类型
 interface skuTableResponseType {
+  sku_id?: number
   uid: number | string
   spec_name1: string
   spec_name2: string
