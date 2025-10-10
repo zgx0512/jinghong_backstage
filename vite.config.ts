@@ -91,7 +91,8 @@ export default ({ mode }) => {
       {
         name: 'import-element-plus-style',
         transform(code, id) {
-          if (/src\/main.js$/.test(id)) {
+          // 同时匹配 main.ts 与 main.js
+          if (/src\/main\.(t|j)s$/.test(id)) {
             if (mode === 'development') {
               return {
                 code: `${code};import 'element-plus/dist/index.css';`,
@@ -104,6 +105,7 @@ export default ({ mode }) => {
               }
             }
           }
+          return null
         }
       },
 

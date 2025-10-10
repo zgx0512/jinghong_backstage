@@ -60,7 +60,7 @@ export const reqSkuListBySpuId = (id: number | string) => {
 
 // 删除spu的接口
 export const reqRemoveCommodity = (id: number | string) => {
-  return request.delete<nullResponseType, any>('deleteGoods/' + id)
+  return request.delete<nullResponseType, any>(`/deleteGoods/${id}`)
 }
 
 // 获取规格类型列表的接口

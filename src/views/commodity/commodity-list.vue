@@ -149,7 +149,7 @@ const tableHeadList = [
               onClick={() => openSku(row)}
             />
             <el-popconfirm
-              title={`确定删除${row.goods_name}?`}
+              title={`确定要删除当前商品?`}
               width={180}
               onConfirm={() => removeCommodity(row.goods_id)}
             >
