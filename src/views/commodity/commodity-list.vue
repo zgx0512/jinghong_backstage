@@ -38,6 +38,8 @@
     ></addOrUpdateGoods>
     <!-- 查看sku对话框 -->
     <skuInfo ref="skuInfoRef"></skuInfo>
+    <!-- 修改商品归属的分类 -->
+    <updateCategory ref="updateCategoryRef" @refresh="refresh" />
   </div>
 </template>
 
@@ -51,6 +53,7 @@ import { reqCommodityList, reqRemoveCommodity } from '~/api/commodity/commodity-
 // 引入子组件
 import addOrUpdateGoods from './components/addOrUpdateGoods.vue'
 import skuInfo from './components/skuInfo.vue'
+import updateCategory from './components/updateCategory.vue'
 import { ElMessage } from 'element-plus'
 // commodity数据列表
 const commodityList = ref<GoodsResponseType[]>([])
@@ -147,6 +150,13 @@ const tableHeadList = [
               size="small"
               title="查看sku"
               onClick={() => openSku(row)}
+            />
+            <el-button
+              type="primary"
+              icon="edit"
+              size="small"
+              title="修改分类"
+              onClick={() => changeCategory(row)}
             />
             <el-popconfirm
               title={`确定要删除当前商品?`}
@@ -257,6 +267,17 @@ const removeCommodity = async (id: number | string) => {
     // 删除失败
     ElMessage.error('删除失败')
   }
+}
+
+const updateCategoryRef = ref()
+// 修改分类的回调
+const changeCategory = (row: GoodsResponseType) => {
+  // 打开对话框
+  updateCategoryRef.value.open(row)
+}
+const refresh = () => {
+  // 重新获取数据
+  getCommodityList()
 }
 </script>
 

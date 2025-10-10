@@ -77,3 +77,8 @@ export const reqAddSpec = (data: any) => {
 export const reqGoodsDetail = (goods_id: number | string) => {
   return request.get<GoodsResponseType, any>(`/getGoodsDetail?goods_id=${goods_id}`)
 }
+
+// 修改商品对应的归属分类
+export const reqUpdateGoodsCategory = (data: any) => {
+  return request.post<nullResponseType, any>('/updateGoodsCategory', data)
+}

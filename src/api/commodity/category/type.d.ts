@@ -13,7 +13,9 @@ interface categoryResponseType {
   name?: string
   level?: number
   parentId?: number | string | null
+  children?: categoryResponseType[]
 }
+
 // 获取商品分类接口返回值的ts类型
 interface categoryInfoResponseType extends responseType {
   data: categoryResponseType[]
