@@ -51,7 +51,7 @@
     "@types/node": "^18.11.18",
     "@types/qs": "^6.9.7",
     "@vitejs/plugin-vue": "^4.2.0",
-    "@vitejs/plugin-vue-jsx": "^3.0.1",
+    "@vitejs/plugin-vue-jsx": "^3.1.0",
     "@vue/compiler-sfc": "^3.1.2",
     "autoprefixer": "^10.4.14",
     "iconify-icon": "^1.0.7",

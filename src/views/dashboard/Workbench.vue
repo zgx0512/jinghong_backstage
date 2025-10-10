@@ -85,7 +85,7 @@ const navList = ref([
   },
   {
     name: '商品列表',
-    url: '/commodity/commodity_list',
+    url: '/commodity/commodity-list',
     icon: 'spu'
   },
   {

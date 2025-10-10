@@ -9,7 +9,7 @@ const routes: RouteRecordRaw[] = [
     path: '/commodity',
     name: 'commodity',
     component: Layout,
-    redirect: '/commodity/commodity_list',
+    redirect: '/commodity/commodity-list',
     meta: {
       title: '商品管理',
       icon: 'ep-goods',
@@ -17,9 +17,9 @@ const routes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'commodity_list',
-        name: 'commodity_list',
-        component: () => import('~/views/commodity/commodity_list.vue'),
+        path: 'commodity-list',
+        name: 'commodity-list',
+        component: () => import('~/views/commodity/commodity-list.vue'),
         meta: {
           title: '商品列表',
           icon: 'ep-film'

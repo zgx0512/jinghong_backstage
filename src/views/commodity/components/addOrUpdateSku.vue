@@ -92,7 +92,7 @@
 import { ref, defineExpose, defineEmits, nextTick } from 'vue'
 // 引入接口函数
 import { reqAttrInfo } from '~/api/commodity/attr'
-import { reqSpuImageList, reqSpuSaleAttrList, reqAddSkuInfo } from '~/api/commodity/commodity_list'
+import { reqSpuImageList, reqSpuSaleAttrList, reqAddSkuInfo } from '~/api/commodity/commodity-list'
 import { reqSkuInfo } from '~/api/commodity/sku'
 // 引入ts类型
 import { attrInfoResponse, attrReponseType } from '~/api/commodity/attr/type'

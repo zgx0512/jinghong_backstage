@@ -93,7 +93,7 @@ import { ref, onMounted, nextTick } from 'vue'
 import { reqSkuList, reqOnSaleSku, reqCancelSaleSku, reqRemoveSku } from '~/api/commodity/sku'
 // 引入ts类型
 import { skuListResponseType } from '~/api/commodity/sku/type'
-import type { skuResponseType } from '~/api/commodity/commodity_list/type'
+import type { skuResponseType } from '~/api/commodity/commodity-list/type'
 // 引入子组件
 import skuDetail from './components/skuDetail.vue'
 // 引入子组件

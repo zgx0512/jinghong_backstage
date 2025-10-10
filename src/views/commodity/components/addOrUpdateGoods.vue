@@ -1,10 +1,16 @@
 <template>
   <el-card>
-    <el-form :label-width="100" :model="goodsInfoForm" :rules="rules" ref="goodsInfoFormRef">
+    <el-form
+      v-loading="formLoading"
+      :label-width="100"
+      :model="goodsInfoForm"
+      :rules="rules"
+      ref="goodsInfoFormRef"
+    >
       <el-form-item label="商品名称" prop="goods_name">
         <el-input v-model="goodsInfoForm.goods_name" class="w500"></el-input>
       </el-form-item>
-      <el-form-item label="品牌" prop="tm_id">
+      <el-form-item label="品牌">
         <el-select placeholder="请选择品牌" v-model="goodsInfoForm.tm_id" class="w260">
           <el-option v-for="tm in tmList" :key="tm.id" :label="tm.tmName" :value="tm.id" />
         </el-select>
@@ -327,13 +333,18 @@
 import draggable from 'vuedraggable'
 import { ref, onMounted, defineEmits, defineExpose, computed } from 'vue'
 // 引入接口函数
-import { reqAddOrUpdateGoods, reqSpecList, reqAddSpec } from '~/api/commodity/commodity_list'
+import {
+  reqAddOrUpdateGoods,
+  reqSpecList,
+  reqAddSpec,
+  reqGoodsDetail
+} from '~/api/commodity/commodity-list'
 // 引入接口函数
 import { reqTmList } from '~/api/commodity/trademark'
 // 引入ts类型
 import { tmResponseType, tmListResponseType } from '~/api/commodity/trademark/type'
 import { ElMessage } from 'element-plus'
-import type { TableColumnCtx } from 'element-plus'
+import type { TableColumnCtx, UploadFile, UploadUserFile } from 'element-plus'
 // 引入自定义校验规则
 import { imageListValidatePass } from '~/utils/validate'
 import { getToken } from '~/utils/token'
@@ -345,12 +356,12 @@ const uploadHeaders = {
 const emits = defineEmits(['cancel', 'submit'])
 const specList = ref<specResponseType[]>([])
 // 照片墙列表
-const fileList = ref([])
+const fileList = ref<UploadUserFile[]>([])
 // 品牌列表
 const tmList = ref<tmResponseType[]>([])
-// spu表单的ref对象
+// 商品表单的ref对象
 const goodsInfoFormRef = ref()
-// spu表单
+// 商品表单
 const goodsInfoForm = ref<GoodsResponseType>({
   category_id: '',
   goods_id: '',
@@ -713,26 +724,36 @@ const getEmptySkuGroup = () => {
     list: []
   }
 }
+// 辅助函数：将 URL 字符串数组转换为 UploadFile 数组
+const convertUrlsToUploadFiles = (urls: string[]) => {
+  return urls.map((url, index) => ({
+    name: `image-${index + 1}`,
+    url: url,
+    uid: Date.now() + index,
+    status: 'success' as const
+  }))
+}
+
 // 是否是编辑商品
 const isEdit = ref<boolean>(false)
 // 打开卡片的回调
 const open = async (row: GoodsResponseType, category3Id: number | string) => {
   getSpecList()
   goodsInfoForm.value.category_id = category3Id
+
   if (row) {
     isEdit.value = true
-    goodsInfoForm.value.goods_id = row.goods_id
-    goodsInfoForm.value.goods_name = row.goods_name
-    goodsInfoForm.value.tm_id = row.tm_id
-    goodsInfoForm.value.is_onsale = row.is_onsale
+    await getGoodsDetail(row.goods_id)
+  } else {
+    // 新增商品时重置
+    isEdit.value = false
+    fileList.value = []
   }
 }
 // 表单校验规则
 const rules = ref({
   goods_name: { required: true, message: '商品名称不能为空', trigger: 'blur' },
-  tm_id: { required: true, message: '商品品牌不能为空', trigger: 'blur' },
   is_onsale: { required: true, message: '商品上架状态不能为空', trigger: 'blur' },
-  description: { required: true, message: 'SPU描述不能为空', trigger: 'blur' },
   imageList: {
     required: true,
     validator: (e1: any, e2: any, e3: any) =>
@@ -773,8 +794,8 @@ const cancel = () => {
   emits('cancel')
 }
 // 点击已上传图片放大icon的回调
-const handlePictureCardPreview = (uploadFile: any) => {
-  dialogImageUrl.value = uploadFile.url
+const handlePictureCardPreview = (uploadFile: UploadFile) => {
+  dialogImageUrl.value = uploadFile.url as string
   dialogVisible.value = true
 }
 // 图片上传前的回调
@@ -870,10 +891,18 @@ const submit = () => {
             spec: spec_list
           }
         })
+        // 处理图片列表：从 UploadFile 数组提取 URL 字符串数组
+        data.image_list = fileList.value
+          .map((file) => {
+            // 优先使用 response.data.url（上传成功后的真实URL）
+            // 其次使用 file.url（编辑时的URL）
+            return (file.response as any)?.data?.url || file.url || ''
+          })
+          .filter((url) => url)
         const result = await reqAddOrUpdateGoods(data)
         if (result.code === 200) {
           // 添加|修改成功
-          ElMessage.success('保存成功')
+          ElMessage.success(result.message)
           // 通知父组件切换卡片
           emits('submit', goodsInfoForm.value.goods_id)
           // 关闭加载效果
@@ -925,6 +954,8 @@ const addSpec = async () => {
     }
     await reqAddSpec(data)
     ElMessage.success('添加成功')
+    // 重新获取规格类型列表
+    getSpecList()
   } catch (error) {
     console.log(error)
   } finally {
@@ -1104,6 +1135,137 @@ const handlePriceChange = (row: skuTableResponseType, type: PriceType) => {
       row.min_normal_price = '' // 清空非法值
     }
   }
+}
+const formLoading = ref(false)
+// 获取商品详情
+const getGoodsDetail = async (goodsId: number | string) => {
+  try {
+    formLoading.value = true
+    const res = await reqGoodsDetail(goodsId)
+    if (res.code === 200) {
+      const { data } = res
+      const service_labels = Array.isArray(data.service_labels)
+        ? data.service_labels
+        : (data.service_labels ? data.service_labels.split(',') : [])
+            .map(Number)
+            .filter(Number.isFinite)
+
+      const goods_labels = Array.isArray(data.goods_labels)
+        ? data.goods_labels
+        : (data.goods_labels ? data.goods_labels.split(',') : [])
+            .map(Number)
+            .filter(Number.isFinite)
+      goodsInfoForm.value = { ...data, goods_labels, service_labels }
+
+      // 处理sku规格
+      handleSkuSpec(data.sku_list)
+      // 处理表格数据
+      handleSkuTableData(data.sku_list)
+      // 处理编辑时的图片数据
+      if (data.image_list && Array.isArray(data.image_list)) {
+        // 如果 image_list 是字符串数组，转换为 UploadFile 数组
+        if (typeof data.image_list[0] === 'string') {
+          fileList.value = convertUrlsToUploadFiles(data.image_list as string[])
+        } else {
+          // 如果已经是 UploadFile 数组，直接使用
+          fileList.value = data.image_list as any
+        }
+      } else {
+        fileList.value = []
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/**
+ * 处理sku规格
+ * - 使用 Map/Set 提升查找与去重效率
+ * - 规范化 spec_value（trim）
+ * - 降低响应式写次数
+ */
+const handleSkuSpec = (skuList: ISku[]) => {
+  // 以现有分组初始化 Map，便于 O(1) 查找/创建
+  const groupMap = new Map<number, skuGroupResponseType>()
+  const valueSetMap = new Map<number, Set<string>>()
+
+  for (const g of skuGroups.value) {
+    const id = Number(g.spec_id)
+    if (!Number.isFinite(id)) continue
+    groupMap.set(id, g)
+    valueSetMap.set(id, new Set((g.list || []).map((it) => (it.spec_value || '').trim())))
+  }
+
+  // 累加 skuList
+  for (const sku of skuList) {
+    const { spec } = sku
+    for (const item of spec) {
+      const id = Number(item.spec_id)
+      if (!Number.isFinite(id)) continue
+
+      // 获取或创建分组
+      let group = groupMap.get(id)
+      if (!group) {
+        group = {
+          uid: Date.now(),
+          spec_id: id,
+          spec_name: item.spec_name,
+          useSpecThumb: false,
+          customVisible: false,
+          list: []
+        }
+        groupMap.set(id, group)
+        valueSetMap.set(id, new Set())
+      }
+
+      // 标准化规格值并去重
+      const val = (item.spec_value || '').trim()
+      if (!val) continue
+
+      const set = valueSetMap.get(id)!
+      if (!set.has(val)) {
+        group.list.push({
+          uid: Date.now(),
+          spec_id: id,
+          spec_value: val,
+          sku_thumb_url: ''
+        } as any)
+        set.add(val)
+      }
+    }
+  }
+
+  // 一次性写回，减少响应式更新次数
+  skuGroups.value = Array.from(groupMap.values())
+
+  spec_list.value = skuGroups.value.map((item, index) => {
+    return {
+      spec_id: item.spec_id as number,
+      id: Date.now(),
+      spec_name: item.spec_name as string,
+      spec_value: `spec_name${index + 1}`
+    }
+  })
+}
+
+// 处理表格数据
+const handleSkuTableData = (skuList: ISku[]) => {
+  const skuTableData: skuTableResponseType[] = skuList.map((item) => {
+    return {
+      sku_id: item.sku_id,
+      uid: Date.now(),
+      min_group_price: item.min_group_price,
+      min_normal_price: item.min_normal_price,
+      is_default: item.is_default,
+      out_sku_sn: item.out_sku_sn || '',
+      spec_name1: item.spec[0] ? item.spec[0].spec_value : '',
+      spec_name2: item.spec[1] ? item.spec[1].spec_value : ''
+    }
+  })
+  skuTableList.value = skuTableData
 }
 
 onMounted(() => {

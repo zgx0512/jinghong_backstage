@@ -54,6 +54,9 @@ interface ISku {
   min_group_price: number | string // 最低价
   min_normal_price: number | string // 划线价
   is_default: number // 是否默认规格
+  create_time?: string
+  goods_id?: number | string
+  out_sku_sn?: string
   spec: {
     spec_id?: number | string
     spec_name: string
@@ -86,7 +89,7 @@ interface GoodsResponseType {
 // 获取spu数据接口返回值的ts类型
 interface GoodsInfoResponseType extends responseType {
   data: {
-    goods_list?: GoodsResponseType[]
+    goods_list: GoodsResponseType[]
     total: number
     page: number
     page_size: number
