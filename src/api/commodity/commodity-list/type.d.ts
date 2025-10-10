@@ -55,6 +55,7 @@ interface ISku {
   min_normal_price: number | string // 划线价
   is_default: number // 是否默认规格
   create_time?: string
+  update_time?: string
   goods_id?: number | string
   out_sku_sn?: string
   spec: {
@@ -161,7 +162,7 @@ interface skuResponseType {
 
 // 根据spuId获取sku列表接口返回值的ts类型
 interface skuListResponseType extends responseType {
-  data: skuResponseType[]
+  data: ISku[]
 }
 
 // 规格组的ts类型

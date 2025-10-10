@@ -53,9 +53,9 @@ export const reqAddSkuInfo = (data: any) => {
   }
 }
 
-// 根据spuId查找对应的sku列表
-export const reqSkuListBySpuId = (id: number | string) => {
-  return request.get<skuListResponseType, any>(API.FINDBYSPUID_URL + id)
+// 根据GoodsId查找对应的sku列表
+export const reqSkuListByGoodsId = (id: number | string) => {
+  return request.get<skuListResponseType, any>(`/getGoodsSkuList?goods_id=${id}`)
 }
 
 // 删除spu的接口
