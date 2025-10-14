@@ -43,6 +43,26 @@ export default ({ mode }) => {
         }
       }
     },
+    optimizeDeps: {
+      include: [
+        'vue',
+        'vue-router',
+        'pinia',
+        '@vueuse/core',
+        'dayjs',
+        'element-plus'
+      ],
+      exclude: [
+        'echarts',
+        'md-editor-v3',
+        'wangeditor',
+        '@wangeditor/editor-for-vue',
+        '@tinymce/tinymce-vue',
+        'xlsx',
+        'vue-pdf-embed',
+        'gsap'
+      ]
+    },
     define: {
       __APP_INFO__: JSON.stringify(__APP_INFO__),
       __APP_NAME__: JSON.stringify('taopinhui_vue3')

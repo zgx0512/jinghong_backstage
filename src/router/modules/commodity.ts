@@ -28,7 +28,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'sku',
         name: 'sku',
-        component: () => import('~/views/product/sku.vue'),
+        component: () => import('~/views/commodity/sku.vue'),
         meta: {
           title: 'SKU管理',
           icon: 'ep-collection'
@@ -37,7 +37,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'trademark',
         name: 'trademark',
-        component: () => import('~/views/product/trademark.vue'),
+        component: () => import('~/views/commodity/trademark.vue'),
         meta: {
           title: '品牌管理',
           icon: 'ep-suitcase'
@@ -46,7 +46,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'attr',
         name: 'attr',
-        component: () => import('~/views/product/attr.vue'),
+        component: () => import('~/views/commodity/attr.vue'),
         meta: {
           title: '属性管理',
           icon: 'ep-document'
@@ -55,7 +55,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'category',
         name: 'category',
-        component: () => import('~/views/product/category.vue'),
+        component: () => import('~/views/commodity/category.vue'),
         meta: {
           title: '分类管理',
           icon: 'ep-wallet'

@@ -50,7 +50,16 @@ const constantRoutes: RouteRecordRaw[] = [
           icon: 'ep-histogram'
         },
         component: () => import('~/views/dashboard/Analysis.vue')
-      }
+      },
+      // {
+      //   path: 'today-dashboard',
+      //   name: 'today-dashboard',
+      //   meta: {
+      //     title: '今日数据',
+      //     icon: 'ep-data-analysis'
+      //   },
+      //   component: () => import('~/views/dashboard/TodayDashboard.vue')
+      // }
     ]
   },
   {

@@ -20,7 +20,7 @@ import '~/router/permission'
 // 在 main.ts文件中设置svg-icon, tph-table为全局组件
 import svgIcon from '~/components/svgIcon/index.vue'
 import tphTable from '~/components/tph-table.vue'
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
 
 const app = createApp(App)
 
@@ -28,10 +28,7 @@ app.use(i18n)
 app.use(pinia)
 app.use(router)
 
-// 注册全局图标
-for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-  app.component(key, component)
-}
+
 
 app.component('svg-icon', svgIcon)
 app.component('tph-table', tphTable)

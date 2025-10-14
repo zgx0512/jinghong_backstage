@@ -9,6 +9,7 @@
   "route": {
     "仪表盘": "Dashboard",
     "分析": "Analysis",
+    "今日数据": "TodayData",
     "工作台": "Workbench",
     "customDirectives": "Custom Directives",
     "adaptiveHeight": "Adaptive Height",
