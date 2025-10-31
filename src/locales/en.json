@@ -54,6 +54,8 @@
     "品牌管理": "Trademark Management",
     "属性管理": "Attr Management",
     "分类管理": "Category Management",
-    "数据大屏": "Screen"
+    "数据大屏": "Screen",
+    "订单管理": "Order Management",
+    "订单列表": "Order List"
   }
 }

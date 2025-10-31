@@ -16,6 +16,6 @@
     "baseUrl": ".",
     "paths": { "~/*": ["src/*"] }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "src/views/order/order-list/const/index.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

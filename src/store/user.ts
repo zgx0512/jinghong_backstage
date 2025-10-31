@@ -8,6 +8,7 @@
  */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import axios, { type AxiosRequestConfig } from 'axios'
 import { login, reqUserInfo, reqLogout } from '~/api/user'
 import { UserInfo } from '~/types/index'
 import { setToken, clearToken, getToken } from '~/utils/token'
@@ -66,7 +67,28 @@ export const useUserStore = defineStore('userStore', () => {
   }
   // 获取用户信息
   const getUserInfo = async () => {
-    const result = await reqUserInfo()
+    const source = axios.CancelToken.source()
+    const timeoutId = window.setTimeout(() => {
+      source.cancel('getUserInfo timeout')
+    }, 800)
+
+    const config: AxiosRequestConfig = {
+      cancelToken: source.token,
+      timeout: 1000
+    }
+
+    let result
+    try {
+      result = await reqUserInfo(config)
+    } catch (error: unknown) {
+      if (axios.isCancel(error)) {
+        throw new Error('fetch user info timeout')
+      }
+      throw error
+    } finally {
+      window.clearTimeout(timeoutId)
+    }
+
     if (result.code === 200) {
       // 请求成功
       userInfo.value.avatar = result.data.avatar
@@ -88,19 +110,18 @@ export const useUserStore = defineStore('userStore', () => {
 
   // 退出登录
   async function userLogout() {
-    // 发送请求
-    const result = await reqLogout()
-    if (result.code === 200) {
-      // 清空数据
-      ;(userInfo.value.avatar = ''), (userInfo.value.username = '')
-      permiss.value = []
-      // 清空token
-      clearToken()
-      token.value = ''
-      location.reload()
-      return 'ok'
+    try {
+      await reqLogout()
+    } catch (error) {
+      // ignore logout failure, proceed with local cleanup
     }
-    return Promise.reject(new Error())
+    userInfo.value.avatar = ''
+    userInfo.value.username = ''
+    permiss.value = []
+    clearToken()
+    token.value = ''
+    location.reload()
+    return 'ok'
   }
   return {
     permiss,

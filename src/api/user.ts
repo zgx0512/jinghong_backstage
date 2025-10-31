@@ -1,3 +1,4 @@
+import type { AxiosRequestConfig } from 'axios'
 import request from '~/utils/http/axios'
 
 enum API {
@@ -16,11 +17,11 @@ export function login(data: {}) {
 }
 
 // 获取用户信息接口
-export const reqUserInfo = () => {
-  return request.get<any, any>(API.USERINFO_URL)
+export const reqUserInfo = (config?: AxiosRequestConfig) => {
+  return request.get<any, any>(API.USERINFO_URL, config)
 }
 
 // 退出登录接口
-export const reqLogout = () => {
-  return request.post<any, any>(API.LOGOUT_URL)
+export const reqLogout = (config?: AxiosRequestConfig) => {
+  return request.post<any, any>(API.LOGOUT_URL, undefined, config)
 }

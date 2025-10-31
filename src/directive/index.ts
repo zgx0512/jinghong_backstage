@@ -1,15 +1,18 @@
 import { App } from 'vue'
 
-const modules = import.meta.glob('../directive/**/*.ts', {
+type DirectiveModule = { default?: any }
+
+const modules = import.meta.glob<DirectiveModule>('../directive/**/*.ts', {
   eager: true
 })
 
-let mapDirective = new Map()
+let mapDirective = new Map<string, any>()
 
 Object.keys(modules).forEach((key) => {
-  if (modules[key] && modules[key].default) {
+  const mod = modules[key]
+  if (mod && mod.default) {
     const newKey = key.replace(/^\.\/|\.ts|\.js/g, '')
-    mapDirective.set(newKey, modules[key].default)
+    mapDirective.set(newKey, mod.default)
   }
 })
 

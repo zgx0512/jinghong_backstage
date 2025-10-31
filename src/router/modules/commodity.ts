@@ -25,15 +25,15 @@ const routes: RouteRecordRaw[] = [
           icon: 'ep-film'
         }
       },
-      {
-        path: 'sku',
-        name: 'sku',
-        component: () => import('~/views/commodity/sku.vue'),
-        meta: {
-          title: 'SKU管理',
-          icon: 'ep-collection'
-        }
-      },
+      // {
+      //   path: 'sku',
+      //   name: 'sku',
+      //   component: () => import('~/views/commodity/sku.vue'),
+      //   meta: {
+      //     title: 'SKU管理',
+      //     icon: 'ep-collection'
+      //   }
+      // },
       {
         path: 'trademark',
         name: 'trademark',
@@ -43,15 +43,15 @@ const routes: RouteRecordRaw[] = [
           icon: 'ep-suitcase'
         }
       },
-      {
-        path: 'attr',
-        name: 'attr',
-        component: () => import('~/views/commodity/attr.vue'),
-        meta: {
-          title: '属性管理',
-          icon: 'ep-document'
-        }
-      },
+      // {
+      //   path: 'attr',
+      //   name: 'attr',
+      //   component: () => import('~/views/commodity/attr.vue'),
+      //   meta: {
+      //     title: '属性管理',
+      //     icon: 'ep-document'
+      //   }
+      // },
       {
         path: 'category',
         name: 'category',

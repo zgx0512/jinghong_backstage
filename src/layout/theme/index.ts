@@ -11,8 +11,9 @@ export default (pinia: Pinia) => {
   }
   // 如果有缓存的自定义设置
   if (useTheme.css) {
-    Object.keys(useTheme.css).forEach((val) => {
-      document.documentElement.style.setProperty(val, useTheme.css[val])
+    const cssVars = useTheme.css as Record<string, string>
+    Object.keys(cssVars).forEach((key) => {
+      document.documentElement.style.setProperty(key, cssVars[key])
     })
   }
 }

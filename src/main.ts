@@ -20,7 +20,10 @@ import '~/router/permission'
 // 在 main.ts文件中设置svg-icon, tph-table为全局组件
 import svgIcon from '~/components/svgIcon/index.vue'
 import tphTable from '~/components/tph-table.vue'
+import pageFilter from '~/components/page-filter/index.vue'
+import jhTable from '~/components/jh-table/index.vue'
 
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 const app = createApp(App)
 
@@ -28,10 +31,17 @@ app.use(i18n)
 app.use(pinia)
 app.use(router)
 
-
+// 全局注册 Element Plus 图标，兼容现有用法（如 <Edit /> 或 icon="Edit"）
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
 
 app.component('svg-icon', svgIcon)
 app.component('tph-table', tphTable)
+app.component('page-filter', pageFilter)
+app.component('jh-table', jhTable)
+
+// 引入iconify图标
 import 'iconify-icon'
 
 // 注册指令
@@ -45,7 +55,7 @@ initTheme(pinia)
 // 引入VForm 设计器需全局引入Element Plus
 // import ElementPlus from 'element-plus' //引入element-plus库
 // import 'element-plus/dist/index.css' //引入element-plus样式
-// //  引入并全局注册VForm 3组件
+//  引入并全局注册VForm 3组件
 // import VForm3 from 'vform3-builds' //引入VForm 3库
 // import 'vform3-builds/dist/designer.style.css' //引入VForm3样式
 // app.use(ElementPlus) //全局注册element-plus

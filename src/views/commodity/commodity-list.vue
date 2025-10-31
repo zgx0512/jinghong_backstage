@@ -78,7 +78,7 @@ const tableHeadList = [
     fit: true,
     align: 'left',
     component: {
-      render(h: any, row: any) {
+      render(h: any, row: GoodsResponseType) {
         return (
           <div class="goods-info">
             {row.image_list && <el-image class="goods-img" src={row.image_list[0]} />}
