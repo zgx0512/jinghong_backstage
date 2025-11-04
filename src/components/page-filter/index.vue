@@ -460,6 +460,9 @@ defineExpose({
             min-height: 28px;
             padding: 3px 9px;
           }
+          .el-select__selected-item {
+            text-align: center;
+          }
         }
       }
 

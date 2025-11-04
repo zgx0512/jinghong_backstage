@@ -104,30 +104,7 @@ export default ({ mode }) => {
         autoInstall: true
       }),
 
-      // 使用unplugin-vue-components按需加载样式，开发环境会导致项目异常卡顿
-      // 导致原因：vite会预加载style，当首次启动 vite 服务时会对 style 进行依赖预构建，，因为element-plus的按需样式会导入大量style文件，导致页面会卡住直至style构建完成
-      // https://github.com/antfu/unplugin-vue-components/issues/361
-      // 这里自定义一个vite插件，更改src/main.js内容，开发环境全局引入样式
-      {
-        name: 'import-element-plus-style',
-        transform(code, id) {
-          // 同时匹配 main.ts 与 main.js
-          if (/src\/main\.(t|j)s$/.test(id)) {
-            if (mode === 'development') {
-              return {
-                code: `${code};import 'element-plus/dist/index.css';`,
-                map: null
-              }
-            } else {
-              return {
-                code: `${code};import 'element-plus/theme-chalk/src/message-box.scss';import 'element-plus/theme-chalk/src/message.scss';`,
-                map: null
-              }
-            }
-          }
-          return null
-        }
-      },
+      // 移除开发环境全局样式导入，使用按需导入避免预构建阻塞
 
       createSvg('./src/components/svgIcon/svgIcons/'),
        createSvgIconsPlugin({

@@ -27,6 +27,7 @@ interface OrderResponse {
   create_time: string
   pay_time: string
   full_address?: string
+  hide?: boolean
 }
 
 // 获取订单列表的ts类型

@@ -22,7 +22,7 @@ interface JHTablePageInfoType {
   total: number
   limit: number
   page: number
-  pageSizes: number[]
+  page_sizes: number[]
 }
 
 interface JHTableOptionsType {
