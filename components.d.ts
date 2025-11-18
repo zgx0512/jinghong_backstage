@@ -47,9 +47,12 @@ declare module '@vue/runtime-core' {
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']
+    ElTimeline: typeof import('element-plus/es')['ElTimeline']
+    ElTimelineItem: typeof import('element-plus/es')['ElTimelineItem']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     ElTree: typeof import('element-plus/es')['ElTree']
     ElUpload: typeof import('element-plus/es')['ElUpload']
+    ExpressLogistics: typeof import('./src/components/express-logistics/index.vue')['default']
     GsapNumber: typeof import('./src/components/gsap/GsapNumber.vue')['default']
     IconSelect: typeof import('./src/components/IconSelect.vue')['default']
     IEpBrush: typeof import('~icons/ep/brush')['default']
@@ -58,6 +61,7 @@ declare module '@vue/runtime-core' {
     IEpQuestionFilled: typeof import('~icons/ep/question-filled')['default']
     IEpSearch: typeof import('~icons/ep/search')['default']
     JhTable: typeof import('./src/components/jh-table/index.vue')['default']
+    LogisticsTrack: typeof import('./src/components/logistics-track/index.vue')['default']
     MoDict: typeof import('./src/components/MoDict.vue')['default']
     MoIcon: typeof import('./src/components/MoIcon.vue')['default']
     MyEchart: typeof import('./src/components/echarts/MyEchart.vue')['default']
@@ -65,6 +69,7 @@ declare module '@vue/runtime-core' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./src/components/svgIcon/index.vue')['default']
+    Timeline: typeof import('./src/components/timeline/index.vue')['default']
     TphTable: typeof import('./src/components/tph-table.vue')['default']
   }
   export interface ComponentCustomProperties {

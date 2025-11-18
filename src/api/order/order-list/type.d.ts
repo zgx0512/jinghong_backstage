@@ -7,7 +7,7 @@ interface responseType {
 // 每笔订单的ts类型
 interface OrderResponse {
   c_user_id: number
-  order_id: number
+  order_id: string
   order_status: number
   after_sale_status: number
   goods_id: number
@@ -17,6 +17,8 @@ interface OrderResponse {
   goods_image: string
   spec: string
   min_group_price: number
+  express_sn?: string
+  express_code?: string
   recipient_name: string
   recipient_phone: string
   recipient_address: string
@@ -32,8 +34,22 @@ interface OrderResponse {
 
 // 获取订单列表的ts类型
 interface OrderListResponse extends responseType {
-  data: OrderResponse[]
-  total: number
-  page: number
-  page_size: number
+  data: {
+    list: OrderResponse[]
+    total: number
+    page: number
+    page_size: number
+  }
+}
+
+interface ICheckpoint {
+  content: string // 轨迹内容
+  express_name?: string
+  is_received: number
+  op_time: Date
+  op_type: string
+}
+
+interface ExpressInfoResponse extends responseType {
+  data: ICheckpoint[]
 }

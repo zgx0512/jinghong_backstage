@@ -1,5 +1,3 @@
-import dayjs from 'dayjs'
-
 // 售后状态列表
 export const AFTER_SALE_STATUS_LIST = [
   {
@@ -51,7 +49,7 @@ export const ORDER_STATUS_LIST = [
     value: 5
   },
   {
-    label: '售后中',
+    label: '已取消',
     value: 6
   }
 ]
@@ -141,4 +139,16 @@ export const FILTER_CONFIGS: filterConfigType[] = [
     ]
   }
 ]
+
+// 目前支持的快递公司
+export const LOGISTICS_COMPANY = [
+  { label: "顺丰速运", value: "shunfeng" },
+  { label: "申通快递", value: "shentong" },
+  { label: "圆通快递", value: "yuantong" },
+  { label: "中通快递", value: "zhongtong" },
+  { label: "韵达快递", value: "yunda" },
+  { label: "EMS", value: "ems" },
+  { label: "京东物流", value: "jd" },
+  { label: "极兔速递", value: "jtexpress" },
+];
 

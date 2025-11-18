@@ -13,6 +13,7 @@
       :tableProp="tableProp"
       :page_info="page_info"
     />
+    <shipmentDialog ref="shipmentDialogRef" @refresh="retGetList(page_info.page)" />
   </div>
 </template>
 
@@ -21,8 +22,10 @@ defineOptions({
   name: 'OrderList'
 })
 import { ref, onMounted, onBeforeMount } from 'vue'
-import { FILTER_CONFIGS, ORDER_STATUS_MAP, AFTER_SALE_STATUS_MAP } from './const'
-import { getOrderList } from '~/api/order/order-list'
+import { FILTER_CONFIGS, ORDER_STATUS_MAP, AFTER_SALE_STATUS_MAP, LOGISTICS_COMPANY } from './const'
+import { getOrderList, reqExpressDetail } from '~/api/order/order-list'
+import shipmentDialog from './components/shipment-dialog.vue'
+import LogisticsTrack from '~/components/logistics-track/index.vue'
 
 const filterConfigs = ref<filterConfigType[]>([])
 const tableColumns = ref<any[]>([])
@@ -100,6 +103,44 @@ const initTable = () => {
       width: '100px',
       component: {
         render(h: any, row: OrderResponse) {
+          const courierName =
+            LOGISTICS_COMPANY.find((item) => item.value === row.express_code)?.label || ''
+          if ([3, 4, 5].includes(row.order_status)) {
+            // 待收货，待评价，已完成需可以展示出来物流信息
+            return (
+              <el-popover
+                trigger="click"
+                placement="left"
+                width="360"
+                v-slots={{
+                  reference: () => {
+                    return (
+                      <div
+                        class="order-status"
+                        onClick={() => {
+                          getExpressDetail(row)
+                        }}
+                      >{`${ORDER_STATUS_MAP[row.order_status]} >`}</div>
+                    )
+                  },
+                  default: () => {
+                    return (
+                      <LogisticsTrack
+                        courierName={courierName}
+                        trackingNumber={row.express_sn}
+                        trackList={expressInfo.value}
+                        loading={expressLoading.value}
+                      />
+                    )
+                  }
+                }}
+                onHide={() => {
+                  expressInfo.value = []
+                  expressLoading.value = false
+                }}
+              ></el-popover>
+            )
+          }
           return <div>{ORDER_STATUS_MAP[row.order_status] || '--'}</div>
         }
       }
@@ -188,22 +229,35 @@ const initTable = () => {
     {
       label: '操作',
       property: 'action',
-      width: '100px',
+      width: '142px',
       fixed: 'right',
       component: {
         render(h: any, row: OrderResponse) {
           return (
-            <div>
+            <div class="action-btns">
               <el-button
                 type="primary"
                 size="small"
                 text
-                vOnClick={() => {
+                onClick={() => {
                   openDetail()
                 }}
               >
                 查看详情
               </el-button>
+              {/* 待发货出现发货按钮 */}
+              {Number(row.order_status) === 2 && (
+                <el-button
+                  type="primary"
+                  size="small"
+                  text
+                  onClick={() => {
+                    openShipmentDialog(row)
+                  }}
+                >
+                  发货
+                </el-button>
+              )}
             </div>
           )
         }
@@ -212,7 +266,7 @@ const initTable = () => {
   ]
 }
 const tableOptions = ref({
-  height: 'auto',
+  height: 'auto'
 })
 
 const page_info = ref({
@@ -246,7 +300,7 @@ const mergeAddress = (row: OrderResponse) => {
 const getList = async () => {
   try {
     const params = getParams()
-    const res = await getOrderList(params)
+    const res: OrderListResponse = await getOrderList(params)
     const { data } = res
     tableList.value = data.list.map((item: OrderResponse) => ({
       ...item,
@@ -309,7 +363,7 @@ const hidePhone = (phone: string) => {
 // 隐藏地址
 const hideAddress = (address: string) => {
   if (!address) return address
-  return '*'.repeat(20)
+  return '*'.repeat(40)
 }
 
 // 重置数据
@@ -320,6 +374,33 @@ const retGetList = (page = 1) => {
 
 const changeFilter = () => {
   retGetList()
+}
+
+const shipmentDialogRef = ref()
+const openShipmentDialog = (row: OrderResponse) => {
+  shipmentDialogRef.value.open(row)
+}
+
+const expressInfo = ref<ICheckpoint[]>([])
+const expressLoading = ref(false)
+// 获取物流信息
+const getExpressDetail = async (row: OrderResponse) => {
+  try {
+    expressLoading.value = true
+    const params = {
+      express_sn: row.express_sn as string,
+      express_code: row.express_code as string
+    }
+    const res = await reqExpressDetail(params)
+    if (res.code === 200) {
+      const { data } = res
+      expressInfo.value = data
+    }
+  } catch (error) {
+    console.log(error)
+  } finally {
+    expressLoading.value = false
+  }
 }
 
 onBeforeMount(() => {
@@ -377,6 +458,15 @@ onMounted(() => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .action-btns {
+    .el-button {
+      margin-left: 0px;
+    }
+  }
+  .order-status {
+    color: #f3a930;
+    cursor: pointer;
   }
 }
 </style>
