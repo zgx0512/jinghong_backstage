@@ -27,6 +27,7 @@
       </template>
     </el-timeline-item>
   </el-timeline>
+  <div v-show="records.length === 0" class="no-data">暂无物流信息</div>
 </template>
 
 <script setup lang="ts">
@@ -71,5 +72,13 @@ const displayData = computed(() => {
       }
     }
   }
+}
+.no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
 }
 </style>

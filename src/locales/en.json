@@ -56,6 +56,7 @@
     "分类管理": "Category Management",
     "数据大屏": "Screen",
     "订单管理": "Order Management",
-    "订单列表": "Order List"
+    "订单列表": "Order List",
+    "订单详情": "Order Detail"
   }
 }

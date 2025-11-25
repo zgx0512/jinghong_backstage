@@ -31,9 +31,11 @@ export const reqSendExpress = (data: {
  * @param params.express_code - 快递公司编码
  * @returns 返回快递详情信息的Promise对象
  */
-export const reqExpressDetail = (params: {
-  express_sn: string
-  express_code: string
-}) => {
+export const reqExpressDetail = (params: { express_sn: string; express_code: string }) => {
   return request.get<ExpressInfoResponse, any>('/getExpressDetail', { params })
+}
+
+// 获取订单详情
+export const reqOrderDetail = (params: { order_id: string }) => {
+  return request.get<OrderResponse, any>('/getOrderDetail', { params })
 }

@@ -3,7 +3,6 @@
     <el-table
       :data="props.data"
       border
-      style="margin: 10px 0"
       class="jh-table"
       tooltip-effect="light"
       v-bind="props.tableOptions"
@@ -127,6 +126,7 @@ const handleHeaderDragEnd = (newWidth: number, oldWidth: number, column: any) =>
   margin: 0 10px 10px 10px;
 }
 .jh-table {
+  margin: 10px 0;
   font-size: 13px;
   border-bottom: 1px solid var(--el-table-border-color);
   :deep(.el-table__body-wrapper) {

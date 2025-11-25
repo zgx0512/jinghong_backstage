@@ -142,13 +142,13 @@ export const FILTER_CONFIGS: filterConfigType[] = [
 
 // 目前支持的快递公司
 export const LOGISTICS_COMPANY = [
-  { label: "顺丰速运", value: "shunfeng" },
-  { label: "申通快递", value: "shentong" },
-  { label: "圆通快递", value: "yuantong" },
-  { label: "中通快递", value: "zhongtong" },
-  { label: "韵达快递", value: "yunda" },
-  { label: "EMS", value: "ems" },
-  { label: "京东物流", value: "jd" },
-  { label: "极兔速递", value: "jtexpress" },
+  { label: "顺丰速运", value: "shunfeng", phone: "95338" },
+  { label: "申通快递", value: "shentong", phone: "95543" },
+  { label: "圆通快递", value: "yuantong", phone: "95554" },
+  { label: "中通快递", value: "zhongtong", phone: "95311" },
+  { label: "韵达快递", value: "yunda", phone: "95546" },
+  { label: "EMS", value: "ems", phone: "11183" },
+  { label: "京东物流", value: "jd", phone: "950616" },
+  { label: "极兔速递", value: "jtexpress", phone: "400-820-8383" },
 ];
 

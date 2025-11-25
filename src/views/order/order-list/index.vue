@@ -26,6 +26,9 @@ import { FILTER_CONFIGS, ORDER_STATUS_MAP, AFTER_SALE_STATUS_MAP, LOGISTICS_COMP
 import { getOrderList, reqExpressDetail } from '~/api/order/order-list'
 import shipmentDialog from './components/shipment-dialog.vue'
 import LogisticsTrack from '~/components/logistics-track/index.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const filterConfigs = ref<filterConfigType[]>([])
 const tableColumns = ref<any[]>([])
@@ -240,7 +243,7 @@ const initTable = () => {
                 size="small"
                 text
                 onClick={() => {
-                  openDetail()
+                  viewOrderDetail(row)
                 }}
               >
                 查看详情
@@ -315,8 +318,14 @@ const getList = async () => {
   }
 }
 
-function openDetail() {
-  console.log('查看详情')
+function viewOrderDetail(row: OrderResponse) {
+  // 跳转到订单详情页面
+  router.push({
+    path: '/order/order-detail',
+    query: {
+      order_id: row.order_id
+    }
+  })
 }
 
 // 隐藏昵称
@@ -439,7 +448,7 @@ onMounted(() => {
         line-height: 16px;
       }
       .spec {
-        color: #999;
+        color: var(--el-text-color-secondary);
       }
     }
     .goods-price {
@@ -465,7 +474,7 @@ onMounted(() => {
     }
   }
   .order-status {
-    color: #f3a930;
+    color: var(--el-color-warning);
     cursor: pointer;
   }
 }

@@ -33,7 +33,16 @@ const routes: RouteRecordRaw[] = [
           title: '售后管理',
           icon: 'ep-film'
         }
-      }      
+      },
+      {
+        path: 'order-detail',
+        name: 'order-detail',
+        component: () => import('~/views/order/order-detail/index.vue'),
+        hidden: true,
+        meta: {
+          title: '订单详情',
+        }
+      }
     ]
   }
 ]

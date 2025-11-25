@@ -4,6 +4,16 @@ interface responseType {
   ok: boolean
 }
 
+// 订单流转状态ts类型
+interface IOrderStatusLog {
+  order_status: number;
+  id: number;
+  reason: string;
+  order_id: string;
+  c_user_id: number;
+  create_time: string;
+}
+
 // 每笔订单的ts类型
 interface OrderResponse {
   c_user_id: number
@@ -30,6 +40,8 @@ interface OrderResponse {
   pay_time: string
   full_address?: string
   hide?: boolean
+  order_status_log?: IOrderStatusLog[]
+  transaction_id?: string
 }
 
 // 获取订单列表的ts类型
@@ -46,7 +58,7 @@ interface ICheckpoint {
   content: string // 轨迹内容
   express_name?: string
   is_received: number
-  op_time: Date
+  op_time: string
   op_type: string
 }
 
