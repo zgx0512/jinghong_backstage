@@ -7,46 +7,12 @@
       <el-button type="primary" icon="Plus" class="add_btn" @click="openBtnDialog({}, 'add')"
         >添加权限按钮</el-button
       >
-      <el-table
+      <jh-table
         :data="permissionTableData"
-        style="width: 100%; margin-bottom: 20px"
-        row-key="id"
-        border
-        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-        v-loading="loading"
-      >
-        <el-table-column prop="name" label="名称" min-width="110px" />
-        <el-table-column prop="path" label="路径" min-width="110px" />
-        <el-table-column prop="icon" label="图标" />
-        <el-table-column prop="acl" label="权限值"></el-table-column>
-        <el-table-column prop="type" label="类别">
-          <template #default="{ row }">
-            <span>{{ row.type === 'menu' ? '菜单' : '按钮' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" min-width="110px" align="center" />
-        <el-table-column prop="updateTime" label="更新时间" min-width="110px" align="center" />
-        <el-table-column label="操作" align="center" min-width="150px">
-          <template #default="{ row }">
-            <el-button
-              type="primary"
-              icon="Edit"
-              size="small"
-              @click="handleOpenDialog(row, 'update')"
-              >编辑</el-button
-            >
-            <el-popconfirm
-              :title="`确定删除${row.name}${row.type === 'menu' ? '菜单' : '按钮'}?`"
-              @confirm="removePermission(row)"
-              width="180"
-            >
-              <template #reference>
-                <el-button type="danger" icon="Delete" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
+        :tableColumns="tableColumns"
+        :tableOptions="tableOptions"
+        :showPagination="false"
+      ></jh-table>
     </el-card>
     <!-- 添加|修改菜单对话框 -->
     <el-dialog v-model="dialogVisible" :title="title" width="50%" :close-on-click-modal="false">
@@ -109,7 +75,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import { ElMessage } from 'element-plus'
 import { ref, onMounted, nextTick } from 'vue'
 // 引入接口函数
@@ -125,9 +91,139 @@ import addOrUpdateBtn from './components/addOrUpdateBtn.vue'
 // 引入ts类型
 import type { permissionResponseType } from '~/api/acl/permission/type'
 // 菜单表格数组对象
-const permissionTableData = ref([])
+const permissionTableData = ref<permissionResponseType[]>([])
 // 菜单数据加载效果
 const loading = ref<boolean>(false)
+const tableColumns = ref<JHTableColumnType[]>([])
+const tableOptions = ref({
+  height: 'auto',
+  'row-key': 'id',
+  'tree-props': "{ children: 'children', hasChildren: 'hasChildren' }"
+})
+const initTable = () => {
+  tableColumns.value = [
+    {
+      label: '名称',
+      property: 'name',
+      width: '110px',
+      fit: true,
+      align: 'left',
+    },
+    {
+      label: '路径',
+      property: 'path',
+      width: '110px',
+      fit: true,
+      align: 'left',
+      component: {
+        render(h: any, row: permissionResponseType) {
+          return <div>{row.path || '--'}</div>
+        }
+      }
+    },
+    {
+      label: '图标',
+      property: 'icon',
+      width: '110px',
+      fit: true,
+      align: 'left',
+      component: {
+        render(h: any, row: permissionResponseType) {
+          return <div>{row.icon || '--'}</div>
+        }
+      }
+    },
+    {
+      label: '权限值',
+      property: 'acl',
+      width: '110px',
+      fit: true,
+      align: 'left',
+      component: {
+        render(h: any, row: permissionResponseType) {
+          return <div>{row.acl || '--'}</div>
+        }
+      }
+    },
+    {
+      label: '类别',
+      property: 'type',
+      width: '80px',
+      fit: true,
+      align: 'left',
+      component: {
+        render(h: any, row: permissionResponseType) {
+          return <div>{row.type === 'menu' ? '菜单' : '按钮'}</div>
+        }
+      }
+    },
+    {
+      label: '创建时间',
+      property: 'createTime',
+      width: '110px',
+      fit: true,
+      align: 'center',
+      component: {
+        render(h: any, row: permissionResponseType) {
+          return <div>{row.createTime || '--'}</div>
+        }
+      }
+    },
+    {
+      label: '更新时间',
+      property: 'updateTime',
+      width: '110px',
+      fit: true,
+      align: 'center',
+      component: {
+        render(h: any, row: permissionResponseType) {
+          return <div>{row.updateTime || '--'}</div>
+        }
+      }
+    },
+    {
+      label: '操作',
+      property: 'action',
+      width: '150px',
+      fit: true,
+      fixed: 'right',
+      component: {
+        render(h: any, row: permissionResponseType) {
+          return (
+            <div>
+              <el-button
+                type="primary"
+                icon="Edit"
+                size="small"
+                onClick={() => {
+                  handleOpenDialog(row, 'update')
+                }}
+              >
+                编辑
+              </el-button>
+              <el-popconfirm
+                title={`确定删除${row.name}${row.type === 'menu' ? '菜单' : '按钮'}?`}
+                width="180"
+                onConfirm={() => {
+                  removePermission(row)
+                }}
+              >
+                {{
+                  reference: () => (
+                    <el-button type="danger" icon="Delete" size="small">
+                      删除
+                    </el-button>
+                  )
+                }}
+              </el-popconfirm>
+            </div>
+          )
+        }
+      }
+    }
+  ]
+}
+
 // 控制添加|修改菜单显示与隐藏
 const dialogVisible = ref<boolean>(false)
 // 对话框标题
@@ -163,6 +259,7 @@ const getPermissionInfo = async () => {
   }
 }
 onMounted(() => {
+  initTable()
   getPermissionInfo()
 })
 // 删除按钮的回调
@@ -332,11 +429,4 @@ const refresh = () => {
     margin-top: 1px;
   }
 }
-// .el-table {
-//   :deep(.el-table__header) {
-//     .el-table-fixed-column--right {
-//       border-bottom: 1px solid #dcdfe6;
-//     }
-//   }
-// }
 </style>

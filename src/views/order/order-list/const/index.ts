@@ -68,6 +68,12 @@ export const FILTER_CONFIGS: filterConfigType[] = [
     placeholder: '请输入订单号'
   },
   {
+    label: "订单状态",
+    value: 'order_status',
+    type: 'select',
+    options: [...ORDER_STATUS_LIST]
+  },
+  {
     label: '售后状态',
     value: 'after_sale_status',
     type: 'select',

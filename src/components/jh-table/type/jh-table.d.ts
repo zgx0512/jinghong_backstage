@@ -2,7 +2,7 @@ interface JHTableColumnType {
   label: string
   property?: string
   width?: string
-  fixed?: boolean
+  fixed?: boolean | string
   fit?: boolean
   align?: string
   resizable?: boolean

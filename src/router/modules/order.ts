@@ -12,7 +12,7 @@ const routes: RouteRecordRaw[] = [
     redirect: '/order/order-list',
     meta: {
       title: '订单管理',
-      icon: 'ep-goods',
+      icon: 'ep-burger',
       order: 4
     },
     children: [
@@ -22,15 +22,6 @@ const routes: RouteRecordRaw[] = [
         component: () => import('~/views/order/order-list/index.vue'),
         meta: {
           title: '订单列表',
-          icon: 'ep-film'
-        }
-      },
-      {
-        path: 'after-sale',
-        name: 'after-sale',
-        component: () => import('~/views/order/after-sale/index.vue'),
-        meta: {
-          title: '售后管理',
           icon: 'ep-film'
         }
       },

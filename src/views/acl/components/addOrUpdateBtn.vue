@@ -1,7 +1,7 @@
 <template>
   <el-dialog v-model="dialogVisible" :title="title" width="50%" @close="handleClose">
     <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
-      <el-form-item label="按钮名称" prop="btnName">
+      <el-form-item label="按钮名称" prop="name">
         <el-input placeholder="请你输入按钮名称" v-model="form.name"></el-input>
       </el-form-item>
       <el-form-item label="按钮图标" prop="icon">

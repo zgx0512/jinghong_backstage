@@ -123,7 +123,7 @@ const handleHeaderDragEnd = (newWidth: number, oldWidth: number, column: any) =>
 
 <style lang="scss" scoped>
 .jh-table-container {
-  margin: 0 10px 10px 10px;
+  // margin: 0 10px 10px 10px;
 }
 .jh-table {
   margin: 10px 0;

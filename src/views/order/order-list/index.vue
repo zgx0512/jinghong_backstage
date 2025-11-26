@@ -424,7 +424,8 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 :deep(.jh-table) {
-  width: calc(100%);
+  width: calc(100% - 20px);
+  margin: 10px;
   .goods-info {
     display: flex;
     align-items: center;
