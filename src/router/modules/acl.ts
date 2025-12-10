@@ -36,7 +36,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'permission',
-        name: 'permission',
+        name: 'menu',
         meta: {
           title: '菜单管理',
           icon: 'ep-menu'

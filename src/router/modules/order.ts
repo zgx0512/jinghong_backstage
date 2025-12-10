@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: 'order-list',
-        name: 'order-list',
+        name: 'orderList',
         component: () => import('~/views/order/order-list/index.vue'),
         meta: {
           title: '订单列表',

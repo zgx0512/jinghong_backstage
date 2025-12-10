@@ -1,7 +1,12 @@
 <template>
   <div class="container">
     <el-card>
-      <el-button type="primary" icon="Plus" class="add_btn" @click="openDialog"
+      <el-button
+        v-btnPermiss="'Add-Category'"
+        type="primary"
+        icon="Plus"
+        class="add_btn"
+        @click="openDialog"
         >添加分类</el-button
       >
       <el-table
@@ -17,11 +22,7 @@
         <el-table-column prop="updateTime" label="更新时间" min-width="110px" align="center" />
         <el-table-column label="操作" align="center" min-width="150px">
           <template #default="{ row }">
-            <el-button
-              type="primary"
-              icon="Edit"
-              size="small"
-              @click="openDialog(row)"
+            <el-button v-btnPermiss="'Edit-Category'" type="primary" icon="Edit" size="small" @click="openDialog(row)"
               >编辑</el-button
             >
             <el-popconfirm
@@ -30,7 +31,7 @@
               width="180"
             >
               <template #reference>
-                <el-button type="danger" icon="Delete" size="small">删除</el-button>
+                <el-button v-btnPermiss="'Delete-Category'" type="danger" icon="Delete" size="small">删除</el-button>
               </template>
             </el-popconfirm>
           </template>
@@ -38,7 +39,7 @@
       </el-table>
     </el-card>
     <!-- 添加/编辑分类弹窗 -->
-     <add-or-update-category ref="addOrUpdateCategoryRef" @refresh="refresh" />
+    <add-or-update-category ref="addOrUpdateCategoryRef" @refresh="refresh" />
   </div>
 </template>
 
@@ -65,24 +66,24 @@ const getAllCategoryList = async () => {
     loading.value = false
   }
 }
-const addOrUpdateCategoryRef = ref<InstanceType<typeof addOrUpdateCategory>>();
+const addOrUpdateCategoryRef = ref<InstanceType<typeof addOrUpdateCategory>>()
 const openDialog = (row: categoryResponseType = {}) => {
   addOrUpdateCategoryRef.value?.open(row)
-} 
+}
 const refresh = () => {
-  getAllCategoryList();
+  getAllCategoryList()
 }
 const removeCategory = async (row: categoryResponseType) => {
   try {
-    const res = await reqDeleteCategory(row.id as number);
+    const res = await reqDeleteCategory(row.id as number)
     if (res.code === 200) {
-      ElMessage.success(res.message);
-      refresh();
+      ElMessage.success(res.message)
+      refresh()
     } else {
-      ElMessage.error(res.message);
+      ElMessage.error(res.message)
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
 }
 onMounted(() => {

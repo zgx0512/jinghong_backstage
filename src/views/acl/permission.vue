@@ -1,10 +1,20 @@
 <template>
   <div class="container">
     <el-card>
-      <el-button type="primary" icon="Plus" class="add_btn" @click="openDialog({}, 'add')"
+      <el-button
+        v-btnPermiss="'Add-Menu'"
+        type="primary"
+        icon="Plus"
+        class="add_btn"
+        @click="openDialog({}, 'add')"
         >添加菜单</el-button
       >
-      <el-button type="primary" icon="Plus" class="add_btn" @click="openBtnDialog({}, 'add')"
+      <el-button
+        v-btnPermiss="'Add-Auth-Btn-Menu'"
+        type="primary"
+        icon="Plus"
+        class="add_btn"
+        @click="openBtnDialog({}, 'add')"
         >添加权限按钮</el-button
       >
       <jh-table
@@ -90,6 +100,7 @@ import IconSelect from '~/components/IconSelect.vue'
 import addOrUpdateBtn from './components/addOrUpdateBtn.vue'
 // 引入ts类型
 import type { permissionResponseType } from '~/api/acl/permission/type'
+import { permissionBtn } from '~/utils/permissionBtn'
 // 菜单表格数组对象
 const permissionTableData = ref<permissionResponseType[]>([])
 // 菜单数据加载效果
@@ -107,7 +118,7 @@ const initTable = () => {
       property: 'name',
       width: '110px',
       fit: true,
-      align: 'left',
+      align: 'left'
     },
     {
       label: '路径',
@@ -189,33 +200,42 @@ const initTable = () => {
       fixed: 'right',
       component: {
         render(h: any, row: permissionResponseType) {
+          const editAuth = permissionBtn('Edit-Menu')
+          const deleteAuth = permissionBtn('Delete-Menu')
+          if (!editAuth && !deleteAuth) {
+            return <div>--</div>
+          }
           return (
             <div>
-              <el-button
-                type="primary"
-                icon="Edit"
-                size="small"
-                onClick={() => {
-                  handleOpenDialog(row, 'update')
-                }}
-              >
-                编辑
-              </el-button>
-              <el-popconfirm
-                title={`确定删除${row.name}${row.type === 'menu' ? '菜单' : '按钮'}?`}
-                width="180"
-                onConfirm={() => {
-                  removePermission(row)
-                }}
-              >
-                {{
-                  reference: () => (
-                    <el-button type="danger" icon="Delete" size="small">
-                      删除
-                    </el-button>
-                  )
-                }}
-              </el-popconfirm>
+              {editAuth && (
+                <el-button
+                  type="primary"
+                  icon="Edit"
+                  size="small"
+                  onClick={() => {
+                    handleOpenDialog(row, 'update')
+                  }}
+                >
+                  编辑
+                </el-button>
+              )}
+              {deleteAuth && (
+                <el-popconfirm
+                  title={`确定删除${row.name}${row.type === 'menu' ? '菜单' : '按钮'}?`}
+                  width="180"
+                  onConfirm={() => {
+                    removePermission(row)
+                  }}
+                >
+                  {{
+                    reference: () => (
+                      <el-button type="danger" icon="Delete" size="small">
+                        删除
+                      </el-button>
+                    )
+                  }}
+                </el-popconfirm>
+              )}
             </div>
           )
         }
@@ -268,7 +288,6 @@ const removePermission = async (row: permissionResponseType) => {
   let id = row.id!
   if (row.type === 'btn') {
     api = removeBtn
-    id = row.btnId!
   }
   // 调用接口
   const result = await api(id)

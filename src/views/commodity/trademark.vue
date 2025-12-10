@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <el-card>
-      <el-button type="primary" icon="Plus" @click="open">添加品牌</el-button>
+      <el-button v-btnPermiss="'Add-Trademark'" type="primary" icon="Plus" @click="open">添加品牌</el-button>
       <el-table border :data="tmList" style="margin: 10px 0" v-loading="loading">
         <el-table-column type="index" label="序号" width="80" align="center"></el-table-column>
         <el-table-column
@@ -27,10 +27,10 @@
         ></el-table-column>
         <el-table-column label="操作" align="center">
           <template #default="{ row }">
-            <el-button type="primary" icon="Edit" size="small" @click="open(row)"></el-button>
+            <el-button v-btnPermiss="'Edit-Trademark'" type="primary" icon="Edit" size="small" @click="open(row)"></el-button>
             <el-popconfirm :title="`确定删除${row.tmName}?`" @confirm="remove(row.id)" width="180">
               <template #reference>
-                <el-button type="danger" icon="Delete" size="small"></el-button>
+                <el-button v-btnPermiss="'Delete-Trademark'" type="danger" icon="Delete" size="small"></el-button>
               </template>
             </el-popconfirm>
           </template>
@@ -63,6 +63,7 @@ import type { tmResponseType } from '~/api/commodity/trademark/type'
 // 引入子组件
 import addOrUpdateTm from './components/addOrUpdateTm.vue'
 import { ElMessage } from 'element-plus'
+import { permissionBtn } from '~/utils/permissionBtn'
 // 品牌列表
 const tmList = ref<tmResponseType[]>([])
 // 当前页

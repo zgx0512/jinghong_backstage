@@ -60,7 +60,7 @@
 defineOptions({
   name: 'JhTable'
 })
-import { defineProps, withDefaults, defineEmits, h } from 'vue'
+import { h } from 'vue'
 const props = withDefaults(
   defineProps<{
     tableColumns: JHTableColumnType[]

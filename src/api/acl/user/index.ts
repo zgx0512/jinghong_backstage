@@ -14,8 +14,8 @@ enum API {
   REMOVEUSER_URL = '/deleteUser',
   ADDUSER_URL = '/addUser',
   UPDATEUSER_URL = '/updateUser',
-  GETROLEINFO_URL = '/admin/acl/user/toAssign/',
-  ASSIGNROLE_URL = '/admin/acl/user/doAssignRole'
+  GETROLEINFO_URL = '/getRoleInfo',
+  ASSIGNROLE_URL = '/assignRoles'
 }
 
 // 获取用户数据的接口
@@ -51,11 +51,16 @@ export const reqAddOrUpdateUser = (user: userResponseType) => {
 }
 
 // 根据用户得到角色数据
-export const reqRoleInfo = (adminId: number | string) => {
-  return request.get<roleInfoResponseType, any>(API.GETROLEINFO_URL + adminId)
+/**
+ * 获取用户角色信息
+ * @param userId 用户ID，可以是数字或字符串类型
+ * @returns 返回一个Promise，解析为角色信息响应数据
+ */
+export const reqRoleInfo = (userId: number | string) => { // 定义获取角色信息的请求函数
+  return request.get<roleInfoResponseType, any>(`${API.GETROLEINFO_URL}?userId=${userId}`)
 }
 
 // 分配角色的接口
 export const reqAssignRole = (data: roleVoResponseType) => {
-    return request.post(API.ASSIGNROLE_URL, data)
+  return request.post<addOrUpdateUserResponseType, any>(API.ASSIGNROLE_URL, data)
 }

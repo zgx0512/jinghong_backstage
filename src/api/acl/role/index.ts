@@ -7,8 +7,7 @@ enum API {
   REMOVE_URL = '/deleteRole/',
   ADDROLE_URL = '/addRole',
   UPDATEROLE_URL = '/updateRole',
-  PERMISSONINFO_URL = '/admin/acl/permission/toAssign/',
-  ASSIGNACL_URL = '/admin/acl/permission/doAssignAcl'
+  ASSIGNACL_URL = '/assignPermissions'
 }
 
 // 获取角色列表的接口
@@ -48,11 +47,6 @@ export const reqAddOrUpdateRole = (data: roleResponseType) => {
       data
     })
   }
-}
-
-// 根据角色获取菜单数据的接口
-export const reqPermissionInfo = (roleId: number) => {
-  return request.get<permissionInfoResponseType, any>(API.PERMISSONINFO_URL + roleId)
 }
 
 // 给角色分配权限的接口

@@ -55,6 +55,8 @@ request.interceptors.response.use(
         break
       case 0: 
         msg = '没有数据'
+      case 10001:
+        msg = error.response.data.message    
         break
       default:
         msg = '无网络'

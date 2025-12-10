@@ -18,48 +18,28 @@
     </el-card>
     <!-- 展示用户数据卡片 -->
     <el-card>
-      <!--  v-if="permissionBtn('btn.User.add')" -->
-      <el-button type="primary" icon="Plus" @click="openAddOrUpdateDrawer">添加用户</el-button>
-      <el-button type="danger" icon="Delete" :disabled="idList.length === 0" @click="batchRemove"
+      <el-button v-btnPermiss="'Add-User'" type="primary" icon="Plus" @click="openAddOrUpdateDrawer"
+        >添加用户</el-button
+      >
+      <el-button
+        v-btnPermiss="'Batch-delete-User'"
+        type="danger"
+        icon="Delete"
+        :disabled="idList.length === 0"
+        @click="batchRemove"
         >批量删除</el-button
       >
-      <tph-table
-        :tableData="tableData"
-        :tableHeadList="tableHeadList"
+      <jh-table
+        :data="tableData"
+        :tableColumns="tableColumns"
+        :tableOptions="tableOptions"
         :tableProp="tableProp"
         v-loading="loading"
-        @selectionChange="selectionChange"
+        @selection-change="selectionChange"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
       >
-        <template #default="{ row }">
-          <el-button type="warning" icon="User" size="small" @click="openAssignDrawer(row)"
-            >分配角色</el-button
-          >
-          <el-button type="primary" icon="Edit" size="small" @click="openAddOrUpdateDrawer(row)"
-            >编辑</el-button
-          >
-          <el-popconfirm
-            :title="`确定删除${row.username}?`"
-            width="200"
-            @confirm="removeUser(row.userId)"
-          >
-            <template #reference>
-              <el-button type="danger" icon="Delete" size="small">删除</el-button>
-            </template>
-          </el-popconfirm>
-        </template>
-      </tph-table>
-      <!-- 分页器 -->
-      <el-pagination
-        v-model:current-page="page"
-        v-model:page-size="limit"
-        :page-sizes="[3, 5, 10, 20]"
-        size="small"
-        :background="true"
-        layout="prev, pager, next, jumper, ->, sizes, total"
-        :total="total"
-        @size-change="getUserInfo()"
-        @current-change="getUserInfo()"
-      />
+      </jh-table>
     </el-card>
     <!-- 添加|编辑用户抽屉 -->
     <addOrUpdateUser ref="addOrUpdateUserRef" @submit="submit"></addOrUpdateUser>
@@ -70,12 +50,14 @@
           <el-input disabled v-model="name"></el-input>
         </el-form-item>
         <el-form-item label="角色列表">
-          <el-checkbox
-            v-model="checkAll"
-            :indeterminate="isIndeterminate"
-            @change="handleCheckAllChange"
-            >全选</el-checkbox
-          >
+          <div style="display: block; width: 100%">
+            <el-checkbox
+              v-model="checkAll"
+              :indeterminate="isIndeterminate"
+              @change="handleCheckAllChange"
+              >全选</el-checkbox
+            >
+          </div>
           <el-checkbox-group v-model="checkedRoles" @change="handleCheckedRolesChange">
             <el-checkbox v-for="item in allRoles" :key="item.id" :label="item.id">{{
               item.roleName
@@ -93,7 +75,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import { ElMessage } from 'element-plus'
 import { ref, onMounted } from 'vue'
 import {
@@ -113,72 +95,156 @@ import { userResponseType, roleResponseType } from '~/api/acl/user/type'
 import { permissionBtn } from '~/utils/permissionBtn'
 const username = ref<string>('')
 const tableData = ref<userResponseType[]>([])
-// 表头
-const tableHeadList = [
-  {
-    label: 'ID',
-    property: 'userId',
-    width: '80'
-  },
-  {
-    label: '用户名称',
-    property: 'username',
-    width: '200'
-  },
-  {
-    label: '邮箱',
-    property: 'email',
-    width: '200'
-  },
-  {
-    label: '用户角色',
-    property: 'roleName',
-    width: '120'
-  },
-  {
-    label: '创建时间',
-    property: 'createTime',
-    width: '200'
-  },
-  {
-    label: '更新时间',
-    property: 'updateTime',
-    width: '200'
-  },
-  {
-    label: '操作',
-    width: '300'
-  }
-]
-// 表格基本布局
-const tableProp = {
-  isSelect: true,
-  index: true
-}
 // 表格加载效果
 const loading = ref<boolean>(false)
-// 当前页
-const page = ref<number>(1)
-// 每页大小
-const limit = ref<number>(5)
-// 总数
-const total = ref<number>(0)
+const tableOptions = ref({
+  height: 'auto'
+})
+const page_info = ref({
+  page: 1,
+  limit: 10,
+  total: 0,
+  page_sizes: [3, 5, 10, 20]
+})
+const tableProp = {
+  index: false,
+  isZh: true,
+  isSelect: true
+}
+const tableColumns = ref<any[]>([])
+const initTable = () => {
+  tableColumns.value = [
+    {
+      property: 'userId',
+      label: '用户ID',
+      width: '80px'
+    },
+    {
+      property: 'username',
+      label: '用户名',
+      width: '120px'
+    },
+    {
+      property: 'email',
+      label: '邮箱',
+      width: '160px'
+    },
+    {
+      property: 'roleNames',
+      label: '角色',
+      width: '200px',
+      component: {
+        render(h: any, row: userResponseType) {
+          if (!row.roleNames) {
+            return <div>--</div>
+          }
+          return (
+            <el-tooltip
+              placement="top"
+              effect="light"
+              v-slots={{
+                content: () => <div>{row.roleNames}</div>
+              }}
+            >
+              <div class="text-ellipsis-common">
+                <span>{row.roleNames}</span>
+              </div>
+            </el-tooltip>
+          )
+        }
+      }
+    },
+    {
+      label: '创建时间',
+      property: 'createTime',
+      width: '180px'
+    },
+    {
+      label: '更新时间',
+      property: 'updateTime',
+      width: '180px'
+    },
+    {
+      label: '操作',
+      property: 'operation',
+      width: '280px',
+      fixed: 'right',
+      component: {
+        render(h: any, row: any) {
+          const assignAuth = permissionBtn('Assign-Role-User')
+          const editAuth = permissionBtn('Edit-User')
+          const deleteAuth = permissionBtn('Delete-User')
+          if (!assignAuth && !editAuth && !deleteAuth) {
+            return <div>--</div>
+          }
+          return (
+            <div class="action-btns">
+              {assignAuth && (
+                <el-button
+                  type="warning"
+                  icon="User"
+                  size="small"
+                  onClick={() => {
+                    openAssignDrawer(row)
+                  }}
+                >
+                  分配角色
+                </el-button>
+              )}
+
+              {editAuth && (
+                <el-button
+                  type="primary"
+                  icon="Edit"
+                  size="small"
+                  onClick={() => {
+                    openAddOrUpdateDrawer(row)
+                  }}
+                >
+                  编辑
+                </el-button>
+              )}
+
+              {deleteAuth && (
+                <el-popconfirm
+                  title={`确定删除${row.username}?`}
+                  width="200"
+                  onConfirm={() => {
+                    removeUser(row.userId)
+                  }}
+                  v-slots={{
+                    reference: () => (
+                      <el-button type="danger" icon="Delete" size="small">
+                        删除
+                      </el-button>
+                    )
+                  }}
+                />
+              )}
+            </div>
+          )
+        }
+      }
+    }
+  ]
+}
 // 选出来的用户id列表
 const idList = ref<number[]>([])
 // 获取用户数据的函数
 const getUserInfo = async () => {
   loading.value = true
+  const { page, limit } = page_info.value
   // 发送请求
-  const result = await reqUserInfo(page.value, limit.value, username.value)
+  const result = await reqUserInfo(page, limit, username.value)
   if (result.code === 200) {
     loading.value = false
     // 赋值
-    total.value = result.data.total
+    page_info.value.total = result.data.total
     tableData.value = result.data.usersList.map((item: userResponseType) => {
       return {
         ...item,
         id: item.userId,
-        roleName: item.role!.join(','),
+        roleName: item.roleNames,
         createTime: dayjs(item.createTime).subtract(8, 'hour').format('YYYY-MM-DD HH:mm:ss'),
         updateTime: dayjs(item.updateTime).subtract(8, 'hour').format('YYYY-MM-DD HH:mm:ss')
       }
@@ -186,6 +252,7 @@ const getUserInfo = async () => {
   }
 }
 onMounted(() => {
+  initTable()
   // 页面挂载完毕，获取数据
   getUserInfo()
 })
@@ -194,7 +261,7 @@ const reset = () => {
   // 清空文本框
   username.value = ''
   // 回到第一页
-  page.value = 1
+  page_info.value.page = 1
   // 重新获取用户数据
   getUserInfo()
 }
@@ -220,7 +287,7 @@ const batchRemove = async () => {
           message: '批量删除成功'
         })
         // 回到第一页
-        page.value = 1
+        page_info.value.page = 1
         // 重新获取角色列表
         getUserInfo()
       } catch (error) {
@@ -249,9 +316,9 @@ const removeUser = async (id: number) => {
         message: '删除成功'
       })
       // 判断删除的角色是否是当前页的最后一个
-      if (tableData.value.length <= 1 && page.value > 1) {
+      if (tableData.value.length <= 1 && page_info.value.page > 1) {
         // 前往上一页
-        page.value = page.value - 1
+        page_info.value.page = page_info.value.page - 1
       }
       // 重新获取角色列表数据
       getUserInfo()
@@ -279,7 +346,7 @@ const openAddOrUpdateDrawer = (row: userResponseType) => {
 const submit = (id: number | string) => {
   if (!id) {
     // 是添加，要重新回到首页
-    page.value = 1
+    page_info.value.page = 1
   }
   // 重新获取用户数据
   getUserInfo()
@@ -309,8 +376,8 @@ const openAssignDrawer = async (row: userResponseType) => {
   // 发送请求
   const result = await reqRoleInfo(row.userId)
   if (result.code === 200) {
-    allRoles.value = result.data.allRolesList
-    checkedRoles.value = result.data.assignRoles.map((item: roleResponseType) => item.id)
+    allRoles.value = result.data.allRoles
+    checkedRoles.value = result.data.checkedRoles.map((item: roleResponseType) => item.id)
   }
   // 全选按钮的状态
   checkAll.value = allRoles.value.length === checkedRoles.value.length
@@ -334,14 +401,14 @@ const handleCheckedRolesChange = (value: number[]) => {
 // 分配角色对话框确认按钮的回调
 const assignRole = async () => {
   // 整合参数
-  const roleVo = {
-    roleIdList: checkedRoles.value,
+  const data = {
+    role_ids: checkedRoles.value.join(','),
     userId: userId.value
   }
   // 发送请求
   try {
     assignLoading.value = true
-    await reqAssignRole(roleVo)
+    await reqAssignRole(data)
     // 成功提示信息
     ElMessage({
       type: 'success',
@@ -360,6 +427,15 @@ const assignRole = async () => {
     })
     assignLoading.value = false
   }
+}
+const handleSizeChange = (page_size: number) => {
+  page_info.value.limit = page_size
+  getUserInfo()
+}
+
+const handleCurrentChange = (page: number = 1) => {
+  page_info.value.page = page
+  getUserInfo()
 }
 </script>
 

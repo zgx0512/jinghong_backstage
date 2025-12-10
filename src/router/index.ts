@@ -7,7 +7,6 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-import Layout from '~/layout/index.vue'
 
 const modules = import.meta.glob('./modules/**/*.ts', { eager: true })
 
@@ -21,56 +20,6 @@ Object.values(modules).forEach((key: any) => {
 })
 
 const constantRoutes: RouteRecordRaw[] = [
-  {
-    path: '/dashboard',
-    name: 'dashboard',
-    component: Layout,
-    redirect: '/dashboard/workbench',
-    meta: {
-      title: '仪表盘',
-      icon: 'ep-sunrise',
-      order: 1
-    },
-
-    children: [
-      {
-        path: 'workbench',
-        name: 'workbench',
-        meta: {
-          title: '工作台',
-          icon: 'ep-data-analysis'
-        },
-        component: () => import('~/views/dashboard/Workbench.vue')
-      },
-      {
-        path: 'analysis',
-        name: 'analysis',
-        meta: {
-          title: '分析',
-          icon: 'ep-histogram'
-        },
-        component: () => import('~/views/dashboard/Analysis.vue')
-      },
-      // {
-      //   path: 'today-dashboard',
-      //   name: 'today-dashboard',
-      //   meta: {
-      //     title: '今日数据',
-      //     icon: 'ep-data-analysis'
-      //   },
-      //   component: () => import('~/views/dashboard/TodayDashboard.vue')
-      // }
-    ]
-  },
-  {
-    path: '/',
-    name: 'Home',
-    redirect: '/dashboard',
-    hidden: true,
-    meta: {
-      title: '首页'
-    }
-  },
   {
     path: '/login',
     name: 'Login',
@@ -89,16 +38,6 @@ const constantRoutes: RouteRecordRaw[] = [
     },
     component: () => import(/* webpackChunkName: "400" */ '../views/403.vue')
   },
-  {
-    path: '/screen',
-    name: '数据大屏',
-    meta: {
-      title: '数据大屏',
-      order: 2,
-      icon: 'ep-monitor'
-    },
-    component: () => import('~/views/screen/index.vue')
-  }
 ]
 const lastRoutes = [
   {

@@ -207,3 +207,18 @@ body {
   width: 500px !important;
 }
 
+
+// 通用的文字过长显示省略号样式
+.text-ellipsis-common { 
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  span {
+    display: inline-block;
+    width: 100%;
+    white-space: nowrap; /* 禁止换行 */
+    overflow: hidden; /* 隐藏超出部分 */
+    text-overflow: ellipsis; /* 显示省略号 */
+  }
+}
+

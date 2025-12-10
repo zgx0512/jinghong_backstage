@@ -14,7 +14,8 @@ export interface userResponseType {
   password?: string
   name?: string
   phone?: string | null
-  role?: string[],
+  role_ids?: string,
+  roleNames?: string
   email?: string | null
 }
 // 获取用户数据接口返回值的ts类型
@@ -48,13 +49,13 @@ export interface roleResponseType {
 // 根据用户请求角色数据的接口的返回值的ts类型
 export interface roleInfoResponseType extends responseType {
   data: {
-    assignRoles: roleResponseType[]
-    allRolesList: roleResponseType[]
+    allRoles: roleResponseType[]
+    checkedRoles: roleResponseType[]
   }
 }
 
 // 分配角色的参数的ts类型
 export interface roleVoResponseType {
-  roleIdList: (number | string)[]
+  role_ids: string
   userId: number | string
 }

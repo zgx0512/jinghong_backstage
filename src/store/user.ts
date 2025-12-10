@@ -16,12 +16,12 @@ import { constantRoutes, routeModuleList, lastRoutes } from '~/router'
 import { RouteRecordRaw } from 'vue-router'
 import router from '~/router'
 export const useUserStore = defineStore('userStore', () => {
-  let permiss = ref(['btn_more', 'btn-edit', 'btn-delelte'])
+  const buttons = ref([])
+  const defaultRoute = ref<string>('')
   // 用户信息
   const userInfo = ref({
     avatar: '',
-    username: '',
-    buttons: []
+    username: ''
   })
   // token
   const token = ref<string>(getToken() as string)
@@ -48,22 +48,42 @@ export const useUserStore = defineStore('userStore', () => {
       message: res.message
     }
   }
-  // 递归函数 --- 获取用户所拥有的菜单权限
-  const getAsyncRoutes = (routesList: RouteRecordRaw[], routes: string[]) => {
-    return routesList.filter((item) => {
-      const res = routes.some(
-        (item1: string) => item1.toLowerCase() === (item.name as string).toLowerCase()
-      )
-      if (res) {
-        // 有权限，在判断子路由是否有权限
-        if (item.children && item.children.length > 0) {
-          item.children = getAsyncRoutes(item.children, routes)
+  // 递归函数 --- 根据后端树形菜单顺序，生成用户所拥有的路由
+  const getAsyncRoutes = (routesList: RouteRecordRaw[], menuTree: any[]): RouteRecordRaw[] => {
+    const result: RouteRecordRaw[] = []
+
+    const travel = (nodes: any[], availableRoutes: RouteRecordRaw[]) => {
+      nodes.forEach((node: any) => {
+        const acl = (node.acl || node.name || '').toLowerCase()
+        if (!acl) return
+
+        const matched = availableRoutes.find((route) => {
+          const routeName = (route.name as string | undefined) || ''
+          return routeName.toLowerCase() === acl
+        })
+
+        if (!matched) return
+
+        const routeCopy: RouteRecordRaw = { ...matched }
+
+        if (
+          node.children &&
+          node.children.length > 0 &&
+          matched.children &&
+          matched.children.length > 0
+        ) {
+          routeCopy.children = getAsyncRoutes(matched.children, node.children)
+        } else {
+          routeCopy.children = []
         }
-        return true
-      } else {
-        return false
-      }
-    })
+
+        result.push(routeCopy)
+      })
+    }
+
+    travel(menuTree, routesList)
+
+    return result
   }
   // 获取用户信息
   const getUserInfo = async () => {
@@ -74,7 +94,7 @@ export const useUserStore = defineStore('userStore', () => {
 
     const config: AxiosRequestConfig = {
       cancelToken: source.token,
-      timeout: 1000
+      timeout: 2000
     }
 
     let result
@@ -93,16 +113,22 @@ export const useUserStore = defineStore('userStore', () => {
       // 请求成功
       userInfo.value.avatar = result.data.avatar
       userInfo.value.username = result.data.username
-      userInfo.value.buttons = result.data.buttons
+      buttons.value = result.data.btnAclList
+      defaultRoute.value = result.data.defaultRoute
       // 每次进来，都将routes复原回只有同步路由跟404路由
-      // router.options.routes = [...constantRoutes, ...lastRoutes]
-      // asyncRoutes = getAsyncRoutes(routeModuleList, result.data.routes)
-      // asyncRoutes.forEach((routes) => {
-      //   router.addRoute(routes)
-      //   if (!router.options.routes.some((item) => item.name === routes.name)) {
-      //     router.options.routes = router.options.routes.concat(routes)
-      //   }
-      // })
+      router.options.routes = [...constantRoutes, ...lastRoutes]
+      asyncRoutes = getAsyncRoutes(routeModuleList, result.data.menuList)
+      asyncRoutes.forEach((routes) => {
+        router.addRoute(routes)
+        if (!router.options.routes.some((item) => item.name === routes.name)) {
+          router.options.routes = router.options.routes.concat(routes)
+        }
+      })
+      if (defaultRoute.value) {
+        router.push({ path: defaultRoute.value })
+      } else {
+        router.push({ path: '/403' })
+      }
       return 'ok'
     }
     return Promise.reject(new Error(''))
@@ -117,19 +143,20 @@ export const useUserStore = defineStore('userStore', () => {
     }
     userInfo.value.avatar = ''
     userInfo.value.username = ''
-    permiss.value = []
+    buttons.value = []
     clearToken()
     token.value = ''
     location.reload()
     return 'ok'
   }
   return {
-    permiss,
+    buttons,
     userInfo,
     token,
     asyncRoutes,
     userLogin,
     userLogout,
-    getUserInfo
+    getUserInfo,
+    defaultRoute
   }
 })

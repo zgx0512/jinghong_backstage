@@ -6,7 +6,12 @@
     </el-card>
     <!-- 展示商品数据卡片 -->
     <el-card v-if="showCommodityData === 0">
-      <el-button type="primary" icon="Plus" :disabled="!category3Id" @click="open"
+      <el-button
+        v-btnPermiss="'Add-Commodity'"
+        type="primary"
+        icon="Plus"
+        :disabled="!category3Id"
+        @click="open"
         >添加商品</el-button
       >
       <tph-table
@@ -55,6 +60,7 @@ import addOrUpdateGoods from './components/addOrUpdateGoods.vue'
 import skuInfo from './components/skuInfo.vue'
 import updateCategory from './components/updateCategory.vue'
 import { ElMessage } from 'element-plus'
+import { permissionBtn } from '~/utils/permissionBtn'
 // commodity数据列表
 const commodityList = ref<GoodsResponseType[]>([])
 // 一级分类id
@@ -135,40 +141,55 @@ const tableHeadList = [
     fit: true,
     component: {
       render(h: any, row: GoodsResponseType) {
+        const editGoods = permissionBtn('Edit-Commodity')
+        const viewSku = permissionBtn('View-Sku')
+        const deleteGoods = permissionBtn('Delete-Commodity')
+        const editAttr = permissionBtn('Edit-Attr')
+        if (!editGoods && !viewSku && !deleteGoods && !editAttr) {
+          return <div>--</div>
+        }
         return (
           <div>
-            <el-button
-              type="warning"
-              icon="EditPen"
-              size="small"
-              title="修改商品"
-              onClick={() => open(row)}
-            />
-            <el-button
-              type="info"
-              icon="InfoFilled"
-              size="small"
-              title="查看sku"
-              onClick={() => openSku(row)}
-            />
-            <el-button
-              type="primary"
-              icon="edit"
-              size="small"
-              title="修改分类"
-              onClick={() => changeCategory(row)}
-            />
-            <el-popconfirm
-              title={`确定要删除当前商品?`}
-              width={180}
-              onConfirm={() => removeCommodity(row.goods_id)}
-            >
-              {{
-                reference: () => (
-                  <el-button type="danger" icon="Delete" size="small" title="删除商品" />
-                )
-              }}
-            </el-popconfirm>
+            {editGoods && (
+              <el-button
+                type="warning"
+                icon="EditPen"
+                size="small"
+                title="修改商品"
+                onClick={() => open(row)}
+              />
+            )}
+            {viewSku && (
+              <el-button
+                type="info"
+                icon="InfoFilled"
+                size="small"
+                title="查看sku"
+                onClick={() => openSku(row)}
+              />
+            )}
+            {editAttr && (
+              <el-button
+                type="primary"
+                icon="edit"
+                size="small"
+                title="修改分类"
+                onClick={() => changeCategory(row)}
+              />
+            )}
+            {deleteGoods && (
+              <el-popconfirm
+                title={`确定要删除当前商品?`}
+                width={180}
+                onConfirm={() => removeCommodity(row.goods_id)}
+              >
+                {{
+                  reference: () => (
+                    <el-button type="danger" icon="Delete" size="small" title="删除商品" />
+                  )
+                }}
+              </el-popconfirm>
+            )}
           </div>
         )
       }

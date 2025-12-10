@@ -66,7 +66,7 @@ const open = (row: permissionResponseType, str: string) => {
   if (str === 'update') {
     title.value = '编辑按钮'
     form.value = {
-      id: row.btnId,
+      id: row.id,
       name: row.name,
       acl: row.acl,
       menuId: row.parentId,

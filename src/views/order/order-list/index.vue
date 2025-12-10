@@ -12,6 +12,8 @@
       :data="tableList"
       :tableProp="tableProp"
       :page_info="page_info"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
     />
     <shipmentDialog ref="shipmentDialogRef" @refresh="retGetList(page_info.page)" />
   </div>
@@ -27,6 +29,7 @@ import { getOrderList, reqExpressDetail } from '~/api/order/order-list'
 import shipmentDialog from './components/shipment-dialog.vue'
 import LogisticsTrack from '~/components/logistics-track/index.vue'
 import { useRouter } from 'vue-router'
+import { permissionBtn } from '~/utils/permissionBtn'
 
 const router = useRouter()
 
@@ -236,20 +239,27 @@ const initTable = () => {
       fixed: 'right',
       component: {
         render(h: any, row: OrderResponse) {
+          const viewOrder = permissionBtn('Open-Order')
+          const Shipment = permissionBtn('Shipment-Order')
+          if (!viewOrder && !Shipment) {
+            return <div>--</div>
+          }
           return (
             <div class="action-btns">
-              <el-button
-                type="primary"
-                size="small"
-                text
-                onClick={() => {
-                  viewOrderDetail(row)
-                }}
-              >
-                查看详情
-              </el-button>
+              {viewOrder && (
+                <el-button
+                  type="primary"
+                  size="small"
+                  text
+                  onClick={() => {
+                    viewOrderDetail(row)
+                  }}
+                >
+                  查看详情
+                </el-button>
+              )}
               {/* 待发货出现发货按钮 */}
-              {Number(row.order_status) === 2 && (
+              {Shipment && Number(row.order_status) === 2 && (
                 <el-button
                   type="primary"
                   size="small"
@@ -410,6 +420,16 @@ const getExpressDetail = async (row: OrderResponse) => {
   } finally {
     expressLoading.value = false
   }
+}
+
+const handleSizeChange = (page_size: number) => {
+  page_info.value.limit = page_size
+  getList()
+}
+
+const handleCurrentChange = (page: number = 1) => {
+  page_info.value.page = page
+  getList()
 }
 
 onBeforeMount(() => {

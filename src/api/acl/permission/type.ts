@@ -21,7 +21,6 @@ export interface permissionResponseType {
   icon?: string
   acl?: string
   menuId?: string | number
-  btnId?: string | number
 }
 // 获取菜单数据的接口的返回值的ts类型
 export interface permissionInfoResponseType extends responseType {

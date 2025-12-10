@@ -17,12 +17,18 @@
     </el-card>
     <el-card>
       <el-button
+        v-btnPermiss="'Add-Role'"
         icon="Plus"
         type="primary"
         @click="openDialog({ id: '', roleName: '' }, '添加角色')"
         >添加角色</el-button
       >
-      <el-button icon="Delete" type="danger" :disabled="idList.length === 0" @click="batchRemove"
+      <el-button
+        v-btnPermiss="'Batch-Delete-Role'"
+        icon="Delete"
+        type="danger"
+        :disabled="idList.length === 0"
+        @click="batchRemove"
         >批量删除</el-button
       >
       <!-- 自定义封装表格 -->
@@ -34,15 +40,27 @@
         @selectionChange="selectionChange"
       >
         <template #default="{ row }">
-          <el-button type="warning" icon="User" size="small" @click="openDrawer(row.id)"
+          <el-button
+            v-btnPermiss="'Assign-Auth-Role'"
+            type="warning"
+            icon="User"
+            size="small"
+            @click="openDrawer(row)"
             >分配权限</el-button
           >
-          <el-button type="primary" icon="Edit" size="small" @click="openDialog(row, '编辑角色')"
+          <el-button
+            v-btnPermiss="'Edit-Role'"
+            type="primary"
+            icon="Edit"
+            size="small"
+            @click="openDialog(row, '编辑角色')"
             >编辑</el-button
           >
           <el-popconfirm :title="`确定删除${row.roleName}?`" width="180" @confirm="remove(row.id)">
             <template #reference>
-              <el-button type="danger" icon="Delete" size="small">删除</el-button>
+              <el-button v-btnPermiss="'Delete-Role'" type="danger" icon="Delete" size="small"
+                >删除</el-button
+              >
             </template>
           </el-popconfirm>
         </template>
@@ -69,7 +87,7 @@
       @getRoleInfo="reloadRoleInfo"
     ></addOrUpdateRole>
     <!-- 分配权限抽屉 -->
-    <el-drawer v-model="disAclDrawer" title="分配菜单与按钮的权限">
+    <el-drawer v-model="disAclDrawer" title="分配权限">
       <el-tree
         ref="permissionTreeRef"
         :data="permissionData"
@@ -92,13 +110,8 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import {
-  reqRoleInfo,
-  reqBatchRemoveRole,
-  reqRemoveRole,
-  reqPermissionInfo,
-  reqAssignAcl
-} from '~/api/acl/role'
+import { reqRoleInfo, reqBatchRemoveRole, reqRemoveRole, reqAssignAcl } from '~/api/acl/role'
+import { reqPermissionInfo } from '~/api/acl/permission'
 import addOrUpdateRole from './components/addOrUpdateRole.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { roleResponseType } from '~/api/acl/role/type'
@@ -113,7 +126,7 @@ const tableProp = {
 const tableHeadList = [
   {
     label: 'ID',
-    property: 'id',
+    property: 'roleId',
     width: '80'
   },
   {
@@ -301,62 +314,53 @@ const checkedIds = ref<number[]>([])
 // 树形组件的加载效果
 const treeLoading = ref<boolean>(false)
 const roleId = ref<number>()
+
 // 分配权限按钮的回调
-const openDrawer = async (id: number) => {
+const openDrawer = async (row: roleResponseType) => {
+  const { id, role_ids } = row
   // 存储roleId
-  roleId.value = id
+  roleId.value = id as number
   // 每次打开抽屉，都先清空上一个角色的数据
-  checkedIds.value = []
+  checkedIds.value = [...role_ids!]
   permissionData.value = []
   // 打开抽屉
   disAclDrawer.value = true
   treeLoading.value = true
   // 发送请求，获取菜单数据
-  const result = await reqPermissionInfo(id)
+  const result = await reqPermissionInfo()
   if (result.code === 200) {
     permissionData.value = result.data
-    // 遍历permissionData，找出选中的节点
-    getLeafNode(permissionData.value)
-    console.log(checkedIds.value)
     treeLoading.value = false
   }
-}
-// 递归函数，找出叶子节点
-const getLeafNode = (node: permissionResponseType[]) => {
-  node.forEach((item) => {
-    if (item.children && item.children?.length > 0) {
-      // 不是叶子节点，接着递归
-      getLeafNode(item.children)
-    } else {
-      // 是叶子节点，判断其是否选中
-      if (item.select) {
-        checkedIds.value.push(item.id as number)
-      }
-    }
-  })
 }
 // 抽屉确认按钮的回调
 const submit = async () => {
   // 整合参数，包括叶子节点跟半选中的父节点
-  const permissionIdList = [
-    ...permissionTreeRef.value.getCheckedKeys(),
-    ...permissionTreeRef.value.getHalfCheckedKeys()
-  ]
+  const permissions = [...permissionTreeRef.value.getCheckedKeys()]
+  const halfPermissions = [...permissionTreeRef.value.getHalfCheckedKeys()]
   // 发送请求，分配权限
   try {
-    await reqAssignAcl({ permissionIdList, roleId: roleId.value as number })
+    const data = {
+      permissions,
+      roleId: roleId.value as number,
+      halfPermissions: halfPermissions as number[]
+    }
+    await reqAssignAcl(data)
+
     // 成功提示信息
     ElMessage({
       type: 'success',
-      message: '保存成功'
+      message: '权限分配成功'
     })
+    // 重新获取一遍数据
+    getRoleInfo()
     // 关闭抽屉
     disAclDrawer.value = false
   } catch (error) {
     // 失败提示信息
     ElMessage({
       type: 'error',
-      message: '保存失败'
+      message: '权限分配失败'
     })
   }
 }

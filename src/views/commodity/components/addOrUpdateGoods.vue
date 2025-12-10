@@ -331,7 +331,7 @@
 
 <script lang="ts" setup>
 import draggable from 'vuedraggable'
-import { ref, onMounted, defineEmits, defineExpose, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 // 引入接口函数
 import {
   reqAddOrUpdateGoods,

@@ -21,18 +21,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { ClickOutside as vClickOutside } from 'element-plus'
 import { useTagsStore } from '~/store/tags'
 import { useSidebarStore } from '~/store/sidebar'
-import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
-import { Close, Minus } from '@element-plus/icons-vue'
+import { useUserStore } from '~/store/user'
+import { useRoute, useRouter, RouteRecordRaw } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 const tags = useTagsStore()
+const userStore = useUserStore()
 const siderbarStore = useSidebarStore()
 
+const { defaultRoute } = userStore
 const isActive = (path: string) => {
   return path === route.fullPath
 }
@@ -82,6 +84,26 @@ function removeTag(e: string) {
   if (item) {
     router.push(item.path)
   } else {
+    const getDefaultRoute = (routes: RouteRecordRaw[]): RouteRecordRaw | undefined => {
+      for (const route of routes) {
+        // 先判断自己
+        if (route.path === defaultRoute) {
+          return route
+        }
+        // 再递归子路由
+        if (route.children && route.children.length > 0) {
+          const found = getDefaultRoute(route.children)
+          if (found) {
+            return found
+          }
+        }
+      }
+
+      return undefined
+    }
+
+    const default_route = getDefaultRoute(router.options.routes as RouteRecordRaw[])
+    console.log('default_route', default_route)
     tags.setTagsItem({ name: 'workbench', path: '/dashboard/workbench', title: '工作台' })
     router.push('/')
   }
@@ -106,7 +128,6 @@ setTags(route)
 watch(route, (newVal) => {
   setTags(route)
 })
-
 </script>
 
 <style lang="scss">

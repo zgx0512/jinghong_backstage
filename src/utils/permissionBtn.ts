@@ -11,9 +11,9 @@ import { useUserStore } from '~/store/user'
 import pinia from '~/store'
 // 创建user仓库对象
 const user = useUserStore(pinia)
-// 解构出用户信息
-const { userInfo } = user
+// 解构出按钮权限数组
+const { buttons } = user
 
 export const permissionBtn = (btnCode: string) => {
-    return userInfo.buttons.some(item => item === btnCode)
+    return buttons.some(item => item === btnCode)
 }
