@@ -56,7 +56,7 @@ let keyword = ref()
 let list = ref()
 
 const { t } = useI18n()
-let flatRouteList: RouteRecordRaw[] = flatJson(router.options.routes)
+let flatRouteList: RouteRecordRaw[] = flatJson(router.options.routes as RouteRecordRaw[])
 let localeRouteList: RouteRecordRaw[] = []
 let inputRef = ref<InputInstance>()
 
@@ -91,8 +91,8 @@ function onClose() {
 function search() {
   list.value = localeRouteList.filter(
     (val: RouteRecordRaw) =>
-      val?.name?.toLowerCase().indexOf(keyword.value.toLowerCase()) > -1 ||
-      val?.meta?.title?.toLowerCase().indexOf(keyword.value.toLowerCase()) > -1
+      (val?.name as string)?.toLowerCase().indexOf(keyword.value.toLowerCase()) > -1 ||
+      (val?.meta?.title as string)?.toLowerCase().indexOf(keyword.value.toLowerCase()) > -1
   )
 }
 
@@ -101,10 +101,10 @@ function goto(path: string) {
   router.push(path)
 }
 
-function flatJson(jsonData: RouteRecordRaw[], fp?: '') {
+function flatJson(jsonData: any[], fp?: '') {
   return jsonData.reduce((pre, cur) => {
     const { children = [], ...item } = cur
-    let fullPath = fp ? fp + '/' + cur.path : cur.path
+    let fullPath: any = fp ? fp + '/' + cur.path : cur.path
     fullPath = fullPath.replace(/\/+/g, '/')
 
     return pre.concat([{ ...item, fullPath }], flatJson(children, fullPath))

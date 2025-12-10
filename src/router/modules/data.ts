@@ -49,7 +49,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    redirect: '/dashboard',
+    component: Layout,
     hidden: true,
     meta: {
       title: '首页'

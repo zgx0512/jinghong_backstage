@@ -79,7 +79,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
             message: '登录成功'
           })
           router.push('/')
-          // userStore.getUserInfo()
         } else {
           ElMessage({
             type: 'error',

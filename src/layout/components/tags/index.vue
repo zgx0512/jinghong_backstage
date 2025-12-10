@@ -34,7 +34,7 @@ const tags = useTagsStore()
 const userStore = useUserStore()
 const siderbarStore = useSidebarStore()
 
-const { defaultRoute } = userStore
+const { defaultMenuName, defaultRoute } = userStore
 const isActive = (path: string) => {
   return path === route.fullPath
 }
@@ -87,7 +87,7 @@ function removeTag(e: string) {
     const getDefaultRoute = (routes: RouteRecordRaw[]): RouteRecordRaw | undefined => {
       for (const route of routes) {
         // 先判断自己
-        if (route.path === defaultRoute) {
+        if ((route.name as string).toLowerCase() === defaultMenuName.toLowerCase()) {
           return route
         }
         // 再递归子路由
@@ -102,10 +102,9 @@ function removeTag(e: string) {
       return undefined
     }
 
-    const default_route = getDefaultRoute(router.options.routes as RouteRecordRaw[])
-    console.log('default_route', default_route)
-    tags.setTagsItem({ name: 'workbench', path: '/dashboard/workbench', title: '工作台' })
-    router.push('/')
+    const default_route = getDefaultRoute(router.options.routes as RouteRecordRaw[]) 
+    tags.setTagsItem({ name: default_route!.name as string, path: defaultRoute, title: default_route!.meta!.title as string })
+    router.push(defaultRoute)
   }
 }
 

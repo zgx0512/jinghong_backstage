@@ -18,6 +18,7 @@ import router from '~/router'
 export const useUserStore = defineStore('userStore', () => {
   const buttons = ref([])
   const defaultRoute = ref<string>('')
+  const defaultMenuName = ref<string>('')
   // 用户信息
   const userInfo = ref({
     avatar: '',
@@ -115,6 +116,7 @@ export const useUserStore = defineStore('userStore', () => {
       userInfo.value.username = result.data.username
       buttons.value = result.data.btnAclList
       defaultRoute.value = result.data.defaultRoute
+      defaultMenuName.value = result.data.defaultMenuName
       // 每次进来，都将routes复原回只有同步路由跟404路由
       router.options.routes = [...constantRoutes, ...lastRoutes]
       asyncRoutes = getAsyncRoutes(routeModuleList, result.data.menuList)
@@ -157,6 +159,7 @@ export const useUserStore = defineStore('userStore', () => {
     userLogin,
     userLogout,
     getUserInfo,
-    defaultRoute
+    defaultRoute,
+    defaultMenuName
   }
 })
