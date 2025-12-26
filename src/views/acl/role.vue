@@ -32,51 +32,18 @@
         >批量删除</el-button
       >
       <!-- 自定义封装表格 -->
-      <tph-table
-        :tableData="tableData"
-        :tableHeadList="tableHeadList"
+      <jh-table
+        :data="tableData"
+        :tableColumns="tableColumns"
+        :tableOptions="tableOptions"
         :tableProp="tableProp"
+        :page_info="page_info"
         v-loading="loading"
-        @selectionChange="selectionChange"
-      >
-        <template #default="{ row }">
-          <el-button
-            v-btnPermiss="'Assign-Auth-Role'"
-            type="warning"
-            icon="User"
-            size="small"
-            @click="openDrawer(row)"
-            >分配权限</el-button
-          >
-          <el-button
-            v-btnPermiss="'Edit-Role'"
-            type="primary"
-            icon="Edit"
-            size="small"
-            @click="openDialog(row, '编辑角色')"
-            >编辑</el-button
-          >
-          <el-popconfirm :title="`确定删除${row.roleName}?`" width="180" @confirm="remove(row.id)">
-            <template #reference>
-              <el-button v-btnPermiss="'Delete-Role'" type="danger" icon="Delete" size="small"
-                >删除</el-button
-              >
-            </template>
-          </el-popconfirm>
-        </template>
-      </tph-table>
-      <!-- 分页器 -->
-      <el-pagination
-        v-model:current-page="page"
-        v-model:page-size="limit"
-        :page-sizes="[3, 5, 10, 20]"
-        size="small"
-        :background="true"
-        layout="prev, pager, next, jumper, ->, sizes, total"
-        :total="total"
+        @selection-change="selectionChange"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-      />
+      >
+      </jh-table>
     </el-card>
     <!-- 添加|修改角色对话框 -->
     <addOrUpdateRole
@@ -108,7 +75,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import { ref, onMounted } from 'vue'
 import { reqRoleInfo, reqBatchRemoveRole, reqRemoveRole, reqAssignAcl } from '~/api/acl/role'
 import { reqPermissionInfo } from '~/api/acl/permission'
@@ -116,46 +83,121 @@ import addOrUpdateRole from './components/addOrUpdateRole.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { roleResponseType } from '~/api/acl/role/type'
 import type { permissionResponseType } from '~/api/acl/permission/type'
+// 引入按钮权限函数
+import { permissionBtn } from '~/utils/permissionBtn'
 import dayjs from 'dayjs'
 // 表格的基础属性
-const tableProp = {
+const tableProp: JHTablePropType = {
   isSelect: true,
   index: true
 }
-// 角色表格的表头
-const tableHeadList = [
-  {
-    label: 'ID',
-    property: 'id',
-    width: '80'
-  },
-  {
-    label: '角色名称',
-    property: 'roleName',
-    width: '100'
-  },
-  {
-    label: '创建时间',
-    property: 'createTime',
-    width: '180'
-  },
-  {
-    label: '更新时间',
-    property: 'updateTime',
-    width: '180'
-  },
-  {
-    label: '操作',
-    width: '300'
-  }
-]
+const tableColumns = ref<JHTableColumnType[]>([])
+const tableOptions = ref<JHTableOptionsType>({
+  height: 'auto'
+})
+const page_info = ref<JHTablePageInfoType>({
+  page: 1,
+  limit: 10,
+  total: 0,
+  page_sizes: [3, 5, 10, 20]
+})
+const initTable = () => {
+  tableColumns.value = [
+    {
+      label: 'ID',
+      property: 'id',
+      width: '80px',
+      fit: true,
+      align: 'center'
+    },
+    {
+      label: '角色名称',
+      property: 'roleName',
+      width: '100px',
+      fit: true,
+      align: 'center'
+    },
+    {
+      label: '创建时间',
+      property: 'createTime',
+      width: '180px',
+      fit: true,
+      align: 'center'
+    },
+    {
+      label: '更新时间',
+      property: 'updateTime',
+      width: '180px',
+      fit: true,
+      align: 'center'
+    },
+    {
+      label: '操作',
+      property: 'operation',
+      width: '120px',
+      fit: true,
+      align: 'center',
+      component: {
+        render(h: any, row: roleResponseType) {
+          const assignAuth = permissionBtn('Assign-Auth-Role')
+          const editAuth = permissionBtn('Edit-Auth-Role')
+          const deleteAuth = permissionBtn('Delete-Auth-Role')
+          if (!assignAuth && !editAuth && !deleteAuth) {
+            return <div>--</div>
+          }
+          return (
+            <div>
+              {assignAuth && (
+                <el-button
+                  type="warning"
+                  icon="User"
+                  size="small"
+                  onClick={() => {
+                    openDrawer(row)
+                  }}
+                >
+                  分配权限
+                </el-button>
+              )}
+              {editAuth && (
+                <el-button
+                  type="primary"
+                  icon="Edit"
+                  size="small"
+                  onClick={() => {
+                    openDialog(row, '编辑角色')
+                  }}
+                >
+                  编辑
+                </el-button>
+              )}
+              {editAuth && (
+                <el-popconfirm
+                  title={`确定删除${row.roleName}?`}
+                  width="180"
+                  onConfirm={() => remove(row.id as number)}
+                  v-slots={{
+                    reference: () => (
+                      <el-button
+                        v-btnPermiss="'Delete-Role'"
+                        type="danger"
+                        icon="Delete"
+                        size="small"
+                      >
+                        删除
+                      </el-button>
+                    )
+                  }}
+                ></el-popconfirm>
+              )}
+            </div>
+          )
+        }
+      }
+    }
+  ]
+}
 const roleName = ref<string>('') // 搜索文本框绑定的属性
-// 当前页
-const page = ref<number>(1)
-// 每页大小
-const limit = ref<number>(5)
-// 总数
-const total = ref<number>(0)
 // 用户角色数据列表
 const tableData = ref([])
 // 表格加载效果
@@ -177,12 +219,14 @@ const defaultProps = {
 }
 // 页面挂载完毕时的回调
 onMounted(() => {
+  initTable()
   getRoleInfo()
 })
 // 获取角色列表数据的函数
 const getRoleInfo = async () => {
   loading.value = true
-  const result = await reqRoleInfo(page.value, limit.value, roleName.value)
+  const { page, limit } = page_info.value
+  const result = await reqRoleInfo(page, limit, roleName.value)
   if (result.code === 200) {
     tableData.value = result.data.rolesList.map((role: roleResponseType) => {
       return {
@@ -191,7 +235,7 @@ const getRoleInfo = async () => {
         updateTime: dayjs(role.createTime).subtract(8, 'hour').format('YYYY-MM-DD HH:mm:ss')
       }
     })
-    total.value = result.data.total
+    page_info.value.total = result.data.total
     loading.value = false
   } else {
     loading.value = false
@@ -235,7 +279,7 @@ const batchRemove = () => {
             message: '批量删除成功'
           })
           // 回到第一页
-          page.value = 1
+          page_info.value.page = 1
           // 重新获取角色列表
           getRoleInfo()
         } else {
@@ -277,9 +321,9 @@ const remove = async (id: number) => {
       message: '删除成功'
     })
     // 判断删除的角色是否是当前页的最后一个
-    if (tableData.value.length <= 1 && page.value > 1) {
+    if (tableData.value.length <= 1 && page_info.value.page > 1) {
       // 前往上一页
-      page.value = page.value - 1
+      page_info.value.page = page_info.value.page - 1
     }
     // 重新获取角色列表数据
     getRoleInfo()
@@ -302,7 +346,7 @@ const openDialog = (row: roleResponseType, title: string) => {
 const reloadRoleInfo = (id: number | string) => {
   if (!id) {
     // 是新增，回到第一页
-    page.value = 1
+    page_info.value.page = 1
   }
   // 调用函数
   getRoleInfo()

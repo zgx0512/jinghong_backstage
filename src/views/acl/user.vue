@@ -34,6 +34,7 @@
         :tableColumns="tableColumns"
         :tableOptions="tableOptions"
         :tableProp="tableProp"
+        :page_info="page_info"
         v-loading="loading"
         @selection-change="selectionChange"
         @size-change="handleSizeChange"

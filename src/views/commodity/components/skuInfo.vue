@@ -1,10 +1,12 @@
 <template>
   <el-dialog v-model="dialogVisible" :title="`SKU列表`" width="50%" :before-close="beforClose">
-    <tph-table :tableData="skuList" :tableHeadList="tableHeadList" v-loading="loading">
-      <template #default="{ row }">
-        <img style="width: 50px; display: inline-block" :src="row.skuDefaultImg" alt="" />
-      </template>
-    </tph-table>
+    <jh-table
+      :data="skuList"
+      :tableColumns="tableColumns"
+      :tableOptions="tableOptions"
+      :show-pagination="false"
+      v-loading="loading"
+    />
   </el-dialog>
 </template>
 
@@ -16,7 +18,8 @@ const dialogVisible = ref<boolean>(false)
 // sku列表
 const skuList = ref<skuTableResponseType[]>([])
 // sku列表表格的表头
-const tableHeadList = ref<any[]>([])
+const tableColumns = ref<JHTableColumnType[]>([])
+const tableOptions = ref<JHTableOptionsType[]>([])
 // 表格加载效果
 const loading = ref<boolean>(false)
 // 打开对话框的回调
@@ -52,7 +55,7 @@ const handleSkuSpec = (skuListParam: ISku[]) => {
     spec_name: name,
     spec_value: `spec_name${index + 1}`
   }))
-  tableHeadList.value = spec_list.value.map((item) => {
+  tableColumns.value = spec_list.value.map((item) => {
     return {
       label: item.spec_name,
       property: item.spec_value,
@@ -61,7 +64,19 @@ const handleSkuSpec = (skuListParam: ISku[]) => {
       align: 'center'
     }
   })
-  tableHeadList.value.push(
+  tableColumns.value.unshift({
+    label: '默认图片',
+    property: 'default_img',
+    width: '60px',
+    fit: true,
+    align: 'center',
+    component: {
+      render(h: any, row: any) {
+        return <img style="width: 50px; display: inline-block" src={row.skuDefaultImg} alt="" />
+      }
+    }
+  })
+  tableColumns.value.push(
     {
       label: '售价',
       property: 'min_group_price',
@@ -175,4 +190,4 @@ defineExpose({
 })
 </script>
 
-<style lang="" scoped></style>
+<style lang="scss" scoped></style>

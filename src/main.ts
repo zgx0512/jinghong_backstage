@@ -17,9 +17,8 @@ import './assets/css/theme.css'
 import i18n from './locales'
 // 引入路由鉴权文件
 import '~/router/permission'
-// 在 main.ts文件中设置svg-icon, tph-table为全局组件
+
 import svgIcon from '~/components/svgIcon/index.vue'
-import tphTable from '~/components/tph-table.vue'
 import pageFilter from '~/components/page-filter/index.vue'
 import jhTable from '~/components/jh-table/index.vue'
 
@@ -37,7 +36,6 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 
 app.component('svg-icon', svgIcon)
-app.component('tph-table', tphTable)
 app.component('page-filter', pageFilter)
 app.component('jh-table', jhTable)
 

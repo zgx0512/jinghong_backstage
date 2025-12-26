@@ -71,7 +71,6 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./src/components/svgIcon/index.vue')['default']
     Timeline: typeof import('./src/components/timeline/index.vue')['default']
-    TphTable: typeof import('./src/components/tph-table.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

@@ -14,22 +14,13 @@
         @click="open"
         >添加商品</el-button
       >
-      <tph-table
-        :tableData="commodityList"
-        :tableHeadList="tableHeadList"
+      <jh-table
+        :data="commodityList"
+        :tableColumns="tableColumns"
+        :tableOptions="tableOptions"
         :tableProp="tableProp"
         v-loading="loading"
-      >
-      </tph-table>
-      <!-- 分页器 -->
-      <el-pagination
-        v-model:current-page="page"
-        v-model:page-size="limit"
-        :page-sizes="[3, 5, 10, 20]"
-        size="small"
-        :background="true"
-        layout="prev, pager, next, jumper, ->, sizes, total"
-        :total="total"
+        :page_info="page_info"
         @size-change="getCommodityList()"
         @current-change="getCommodityList()"
       />
@@ -76,7 +67,7 @@ const tableProp = {
 }
 const onsaleMap = { 1: '上架中', 0: '已下架' }
 // commodity表格的表头列表
-const tableHeadList = [
+const tableColumns = [
   {
     label: '商品',
     property: 'goods_name',
@@ -196,30 +187,34 @@ const tableHeadList = [
     }
   }
 ]
+const tableOptions = {
+  height: 'auto'
+}
 // 表格加载效果
 const loading = ref<boolean>(false)
-// 当前页
-const page = ref<number>(1)
-// 每页条数
-const limit = ref<number>(5)
-// 总数
-const total = ref<number>(0)
+const page_info = ref({
+  page: 1,
+  limit: 10,
+  total: 0,
+  page_sizes: [3, 5, 10, 20]
+})
 // 控制显示哪个卡片
 const showCommodityData = ref<number>(0) // 0: 展示数据卡片   1: 添加|编辑卡片  2: 添加sku卡片
 // 添加|编辑卡片的ref对象
 const addOrUpdateCommodityRef = ref()
 // 获取商品列表
 const getCommodityList = async () => {
+  const { page, limit } = page_info.value
   // 开启加载效果
   loading.value = true
   const result: GoodsInfoResponseType = await reqCommodityList(
-    page.value,
-    limit.value,
+    page,
+    limit,
     category3Id.value
   )
   if (result.code === 200) {
     commodityList.value = result.data.goods_list
-    total.value = result.data.total
+    page_info.value.total = result.data.total
     // 关闭加载效果
     loading.value = false
   }
@@ -254,7 +249,7 @@ const open = (row: GoodsResponseType) => {
 const submit = (id: number | string) => {
   if (!id) {
     // id不存在，是新增，回到第一页
-    page.value = 1
+    page_info.value.page = 1
   }
   // 重新获取数据
   getCommodityList()
@@ -280,7 +275,7 @@ const removeCommodity = async (id: number | string) => {
     // 判断删除的是否是当前页的最后一项
     if (commodityList.value.length <= 1) {
       // 是，删除后要往前一页
-      page.value = page.value - 1
+      page_info.value.page = page_info.value.page - 1
     }
     // 重新获取商品列表
     getCommodityList()
