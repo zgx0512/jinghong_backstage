@@ -47,6 +47,7 @@ declare module '@vue/runtime-core' {
     IEpBrush: typeof import('~icons/ep/brush')['default']
     IEpClose: typeof import('~icons/ep/close')['default']
     IEpPosition: typeof import('~icons/ep/position')['default']
+    IEpQuestionFilled: typeof import('~icons/ep/question-filled')['default']
     IEpSearch: typeof import('~icons/ep/search')['default']
     JhTable: typeof import('./src/components/jh-table/index.vue')['default']
     LogisticsTrack: typeof import('./src/components/logistics-track/index.vue')['default']
@@ -58,7 +59,6 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./src/components/svgIcon/index.vue')['default']
     Timeline: typeof import('./src/components/timeline/index.vue')['default']
-    TphTable: typeof import('./src/components/tph-table.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']
