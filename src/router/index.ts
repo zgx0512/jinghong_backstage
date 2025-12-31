@@ -36,8 +36,8 @@ const constantRoutes: RouteRecordRaw[] = [
     meta: {
       title: '没有权限'
     },
-    component: () => import(/* webpackChunkName: "400" */ '../views/403.vue')
-  },
+    component: () => import(/* webpackChunkName: "error" */ '../views/403.vue')
+  }
 ]
 const lastRoutes = [
   {
@@ -47,7 +47,7 @@ const lastRoutes = [
     meta: {
       title: '404'
     },
-    component: () => import(/* webpackChunkName: "400" */ '../views/404.vue')
+    component: () => import(/* webpackChunkName: "error" */ '../views/404.vue')
   }
 ]
 

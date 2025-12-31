@@ -54,10 +54,31 @@ const tags = useTagsStore()
   -webkit-transition: left 0.3s ease-in-out;
   transition: margin-left 0.3s ease-in-out;
 
-  background: url(~/assets/images/bg.avif) no-repeat top center;
+  // 优化：使用渐进式背景加载，避免阻塞首屏渲染
+  background-color: #f5f7fa;
+
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url(~/assets/images/bg.avif) no-repeat top center;
+    background-size: cover;
+    opacity: 0;
+    animation: fadeInBg 0.5s ease-in 0.3s forwards;
+    z-index: -1;
+  }
 
   &.content-collapse {
     margin-left: 144px;
+  }
+}
+
+@keyframes fadeInBg {
+  to {
+    opacity: 1;
   }
 }
 

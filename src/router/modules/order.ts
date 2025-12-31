@@ -19,7 +19,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'order-list',
         name: 'orderList',
-        component: () => import('~/views/order/order-list/index.vue'),
+        component: () =>
+          import(/* webpackChunkName: "order" */ '~/views/order/order-list/index.vue'),
         meta: {
           title: '订单列表',
           icon: 'ep-film'
@@ -28,10 +29,11 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'order-detail',
         name: 'order-detail',
-        component: () => import('~/views/order/order-detail/index.vue'),
+        component: () =>
+          import(/* webpackChunkName: "order" */ '~/views/order/order-detail/index.vue'),
         hidden: true,
         meta: {
-          title: '订单详情',
+          title: '订单详情'
         }
       }
     ]

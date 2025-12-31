@@ -23,7 +23,7 @@ const routes: RouteRecordRaw[] = [
           title: '用户管理',
           icon: 'ep-user'
         },
-        component: () => import('~/views/acl/user.vue')
+        component: () => import(/* webpackChunkName: "acl" */ '~/views/acl/user.vue')
       },
       {
         path: 'role',
@@ -32,7 +32,7 @@ const routes: RouteRecordRaw[] = [
           title: '角色管理',
           icon: 'ep-avatar'
         },
-        component: () => import('~/views/acl/role.vue')
+        component: () => import(/* webpackChunkName: "acl" */ '~/views/acl/role.vue')
       },
       {
         path: 'permission',
@@ -41,7 +41,7 @@ const routes: RouteRecordRaw[] = [
           title: '菜单管理',
           icon: 'ep-menu'
         },
-        component: () => import('~/views/acl/permission.vue')
+        component: () => import(/* webpackChunkName: "acl" */ '~/views/acl/permission.vue')
       }
     ]
   }

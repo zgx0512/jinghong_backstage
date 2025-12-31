@@ -9,6 +9,11 @@ import router from './router'
 import './assets/css/index.scss'
 import './assets/css/element/index.scss'
 
+// 开发环境导入编译好的 Element Plus CSS，避免实时编译 SASS 导致的性能问题
+if (import.meta.env.DEV) {
+  import('element-plus/dist/index.css')
+}
+
 import 'element-plus/theme-chalk/dark/css-vars.css'
 
 // 自定义主题方案
@@ -30,7 +35,7 @@ app.use(i18n)
 app.use(pinia)
 app.use(router)
 
-// 全局注册 Element Plus 图标，兼容现有用法（如 <Edit /> 或 icon="Edit"）
+// 全局注册 Element Plus 图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }

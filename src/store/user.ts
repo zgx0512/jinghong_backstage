@@ -91,11 +91,11 @@ export const useUserStore = defineStore('userStore', () => {
     const source = axios.CancelToken.source()
     const timeoutId = window.setTimeout(() => {
       source.cancel('getUserInfo timeout')
-    }, 800)
+    }, 5000)
 
     const config: AxiosRequestConfig = {
       cancelToken: source.token,
-      timeout: 2000
+      timeout: 5000
     }
 
     let result
@@ -120,12 +120,21 @@ export const useUserStore = defineStore('userStore', () => {
       // 每次进来，都将routes复原回只有同步路由跟404路由
       router.options.routes = [...constantRoutes, ...lastRoutes]
       asyncRoutes = getAsyncRoutes(routeModuleList, result.data.menuList)
+
+      // 优化路由添加逻辑，批量处理
+      const existingRouteNames = new Set(router.options.routes.map((r) => r.name))
+      const newRoutes: RouteRecordRaw[] = []
+
       asyncRoutes.forEach((routes) => {
         router.addRoute(routes)
-        if (!router.options.routes.some((item) => item.name === routes.name)) {
-          router.options.routes = router.options.routes.concat(routes)
+        if (!existingRouteNames.has(routes.name)) {
+          newRoutes.push(routes)
         }
       })
+
+      if (newRoutes.length > 0) {
+        router.options.routes = [...router.options.routes, ...newRoutes]
+      }
       if (defaultRoute.value) {
         router.push({ path: defaultRoute.value })
       } else {

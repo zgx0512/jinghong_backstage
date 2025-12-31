@@ -19,7 +19,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'commodity-list',
         name: 'CommodityList',
-        component: () => import('~/views/commodity/commodity-list.vue'),
+        component: () =>
+          import(/* webpackChunkName: "commodity" */ '~/views/commodity/commodity-list.vue'),
         meta: {
           title: '商品列表',
           icon: 'ep-film'
@@ -28,7 +29,7 @@ const routes: RouteRecordRaw[] = [
       // {
       //   path: 'sku',
       //   name: 'sku',
-      //   component: () => import('~/views/commodity/sku.vue'),
+      //   component: () => import(/* webpackChunkName: "commodity" */ '~/views/commodity/sku.vue'),
       //   meta: {
       //     title: 'SKU管理',
       //     icon: 'ep-collection'
@@ -37,7 +38,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'trademark',
         name: 'trademark',
-        component: () => import('~/views/commodity/trademark.vue'),
+        component: () =>
+          import(/* webpackChunkName: "commodity" */ '~/views/commodity/trademark.vue'),
         meta: {
           title: '品牌管理',
           icon: 'ep-suitcase'
@@ -46,7 +48,7 @@ const routes: RouteRecordRaw[] = [
       // {
       //   path: 'attr',
       //   name: 'attr',
-      //   component: () => import('~/views/commodity/attr.vue'),
+      //   component: () => import(/* webpackChunkName: "commodity" */ '~/views/commodity/attr.vue'),
       //   meta: {
       //     title: '属性管理',
       //     icon: 'ep-document'
@@ -55,7 +57,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'category',
         name: 'category',
-        component: () => import('~/views/commodity/category.vue'),
+        component: () =>
+          import(/* webpackChunkName: "commodity" */ '~/views/commodity/category.vue'),
         meta: {
           title: '分类管理',
           icon: 'ep-wallet'

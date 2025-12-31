@@ -24,7 +24,8 @@ const routes: RouteRecordRaw[] = [
           title: '工作台',
           icon: 'ep-data-analysis'
         },
-        component: () => import('~/views/dashboard/Workbench.vue')
+        component: () =>
+          import(/* webpackChunkName: "dashboard" */ '~/views/dashboard/Workbench.vue')
       },
       {
         path: 'analysis',
@@ -33,7 +34,8 @@ const routes: RouteRecordRaw[] = [
           title: '分析',
           icon: 'ep-histogram'
         },
-        component: () => import('~/views/dashboard/Analysis.vue')
+        component: () =>
+          import(/* webpackChunkName: "dashboard" */ '~/views/dashboard/Analysis.vue')
       }
       // {
       //   path: 'today-dashboard',
@@ -42,7 +44,7 @@ const routes: RouteRecordRaw[] = [
       //     title: '今日数据',
       //     icon: 'ep-data-analysis'
       //   },
-      //   component: () => import('~/views/dashboard/TodayDashboard.vue')
+      //   component: () => import(/* webpackChunkName: "dashboard" */ '~/views/dashboard/TodayDashboard.vue')
       // }
     ]
   },
@@ -63,7 +65,7 @@ const routes: RouteRecordRaw[] = [
       order: 2,
       icon: 'ep-monitor'
     },
-    component: () => import('~/views/screen/index.vue')
+    component: () => import(/* webpackChunkName: "screen" */ '~/views/screen/index.vue')
   }
 ]
 export default routes
