@@ -15,5 +15,5 @@ const user = useUserStore(pinia)
 const { buttons } = user
 
 export const permissionBtn = (btnCode: string) => {
-    return buttons.some(item => item === btnCode)
+  return buttons.some((item) => item === btnCode)
 }

@@ -1,5 +1,5 @@
 /* 
-   权限管理
+  权限管理
  */
 import { RouteRecordRaw } from 'vue-router'
 import Layout from '~/layout/index.vue'
