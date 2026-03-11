@@ -72,6 +72,7 @@ const handleSkuSpec = (skuListParam: ISku[]) => {
     align: 'center',
     component: {
       render(h: any, row: any) {
+        if (!row.default_img) return <div>--</div>;
         return <img style="width: 50px; display: inline-block" src={row.skuDefaultImg} alt="" />
       }
     }

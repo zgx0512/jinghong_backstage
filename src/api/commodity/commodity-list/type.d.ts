@@ -67,22 +67,22 @@ interface ISku {
 
 // 每个商品的ts类型
 interface GoodsResponseType {
-  goods_id: number | string
-  tm_id: string | string // 品牌ID
-  goods_name: string
+  goods_id?: number | string
+  tm_id?: string | string // 品牌ID
+  goods_name?: string
   min_normal_price?: number | string // 划线价
   min_group_price?: number | string // 最低价
   note?: string // 备注
   category_id?: number | string
-  is_onsale: number // 上架状态
+  is_onsale?: number // 上架状态
   is_delete?: number // 删除状态
-  sales_num: number | string // 销量
+  sales_num?: number | string // 销量
   goods_thumbnail_url?: string // 商品主图
-  image_list: string[]
-  sku_list: ISku[]
-  service_labels: string | number[]
-  goods_labels: string | number[]
-  delivery_promise_type: number
+  image_list?: string[]
+  sku_list?: ISku[]
+  service_labels?: string | number[]
+  goods_labels?: string | number[]
+  delivery_promise_type?: number
   create_time?: Date
   update_time?: Date
 }

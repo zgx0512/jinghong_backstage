@@ -11,7 +11,7 @@
         type="primary"
         icon="Plus"
         :disabled="!category3Id"
-        @click="open"
+        @click="() => open({})"
         >添加商品</el-button
       >
       <jh-table
@@ -172,7 +172,7 @@ const tableColumns = [
               <el-popconfirm
                 title={`确定要删除当前商品?`}
                 width={180}
-                onConfirm={() => removeCommodity(row.goods_id)}
+                onConfirm={() => removeCommodity(row.goods_id!)}
               >
                 {{
                   reference: () => (
@@ -207,11 +207,7 @@ const getCommodityList = async () => {
   const { page, limit } = page_info.value
   // 开启加载效果
   loading.value = true
-  const result: GoodsInfoResponseType = await reqCommodityList(
-    page,
-    limit,
-    category3Id.value
-  )
+  const result: GoodsInfoResponseType = await reqCommodityList(page, limit, category3Id.value)
   if (result.code === 200) {
     commodityList.value = result.data.goods_list
     page_info.value.total = result.data.total

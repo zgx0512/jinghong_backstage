@@ -741,9 +741,9 @@ const open = async (row: GoodsResponseType, category3Id: number | string) => {
   getSpecList()
   goodsInfoForm.value.category_id = category3Id
 
-  if (row) {
+  if (row && JSON.stringify(row) !== '{}') {
     isEdit.value = true
-    await getGoodsDetail(row.goods_id)
+    await getGoodsDetail(row.goods_id!)
   } else {
     // 新增商品时重置
     isEdit.value = false

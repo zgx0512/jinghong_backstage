@@ -120,21 +120,21 @@ const initTable = () => {
     {
       label: '创建时间',
       property: 'createTime',
-      width: '180px',
+      width: '140px',
       fit: true,
       align: 'center'
     },
     {
       label: '更新时间',
       property: 'updateTime',
-      width: '180px',
+      width: '140px',
       fit: true,
       align: 'center'
     },
     {
       label: '操作',
       property: 'operation',
-      width: '120px',
+      width: '200px',
       fit: true,
       align: 'center',
       component: {
@@ -171,19 +171,14 @@ const initTable = () => {
                   编辑
                 </el-button>
               )}
-              {editAuth && (
+              {deleteAuth && (
                 <el-popconfirm
                   title={`确定删除${row.roleName}?`}
                   width="180"
                   onConfirm={() => remove(row.id as number)}
                   v-slots={{
                     reference: () => (
-                      <el-button
-                        v-btnPermiss="'Delete-Role'"
-                        type="danger"
-                        icon="Delete"
-                        size="small"
-                      >
+                      <el-button type="danger" icon="Delete" size="small">
                         删除
                       </el-button>
                     )
@@ -228,13 +223,7 @@ const getRoleInfo = async () => {
   const { page, limit } = page_info.value
   const result = await reqRoleInfo(page, limit, roleName.value)
   if (result.code === 200) {
-    tableData.value = result.data.rolesList.map((role: roleResponseType) => {
-      return {
-        ...role,
-        createTime: dayjs(role.createTime).subtract(8, 'hour').format('YYYY-MM-DD HH:mm:ss'),
-        updateTime: dayjs(role.createTime).subtract(8, 'hour').format('YYYY-MM-DD HH:mm:ss')
-      }
-    })
+    tableData.value = result.data.rolesList
     page_info.value.total = result.data.total
     loading.value = false
   } else {
