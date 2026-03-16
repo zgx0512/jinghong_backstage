@@ -177,34 +177,35 @@ const initTable = () => {
       width: '240px',
       component: {
         render(h: any, row: OrderResponse) {
-          const { recipient_name, recipient_phone, full_address, hide } = row
+          const currentHide = recipientHideStates.value.get(row.order_id)
+          const { recipient_name, recipient_phone, full_address } = row
           return (
             <div>
               <div class="recipient-info">
                 <div class="recipient-name">
-                  {(recipient_name && hide ? hideNickName(recipient_name) : recipient_name) || '--'}
+                  {(recipient_name && currentHide ? hideNickName(recipient_name) : recipient_name) || '--'}
                 </div>
                 <div class="recipient-phone">
-                  {(recipient_phone && hide ? hidePhone(recipient_phone) : recipient_phone) || '--'}
+                  {(recipient_phone && currentHide ? hidePhone(recipient_phone) : recipient_phone) || '--'}
                 </div>
                 <mo-icon
-                  iconName={hide ? 'tabler:eye-closed' : 'tabler:eye'}
+                  iconName={currentHide ? 'tabler:eye-closed' : 'tabler:eye'}
                   style="cursor: pointer;"
                   onClick={() => {
-                    row.hide = !hide
+                    recipientHideStates.value.set(row.order_id, !currentHide)
                   }}
                 />
               </div>
               <el-tooltip
                 placement="top"
                 effect="light"
-                disabled={hide || !full_address}
+                disabled={currentHide || !full_address}
                 v-slots={{
                   content: () => <div>{full_address}</div>
                 }}
               >
                 <div class="recipient-address">
-                  {(full_address && hide ? hideAddress(full_address) : full_address) || '--'}
+                  {(full_address && currentHide ? hideAddress(full_address) : full_address) || '--'}
                 </div>
               </el-tooltip>
             </div>
@@ -309,17 +310,25 @@ const mergeAddress = (row: OrderResponse) => {
     row.recipient_address || ''
   }`
 }
+
+const recipientHideStates = ref<Map<string, boolean>>(new Map())
 // 获取列表
 const getList = async () => {
   try {
     const params = getParams()
     const res: OrderListResponse = await getOrderList(params)
     const { data } = res
-    tableList.value = data.list.map((item: OrderResponse) => ({
-      ...item,
-      full_address: mergeAddress(item),
-      hide: true
-    }))
+    tableList.value = data.list.map((item: OrderResponse) => {
+      const orderItem = {
+        ...item,
+        full_address: mergeAddress(item)
+      }
+      if (!recipientHideStates.value.has(item.order_id)) {
+        recipientHideStates.value.set(item.order_id, true)
+      }
+      return orderItem
+    })
+
     page_info.value.page = data.page
     page_info.value.total = data.total
     page_info.value.limit = data.page_size
