@@ -1,17 +1,21 @@
 <template>
   <div class="container">
-    <el-row :gutter="16">
-      <el-col :span="6" v-for="(item, index) in cardData"
-        ><CountCard
-          :title="item.title"
-          :desc="item.desc"
-          :count="item.count"
-          :rate="item.rate"
-          :icon="item.icon"
-          :color="item.color"
-        />
-      </el-col>
-    </el-row>
+    <div>
+      <headerFilter ref="doHeaderFilterRef" @changeFilter="getDataOverview()" />
+      <el-row :gutter="16" v-loading="dataOverviewLoading" class="flex gap-y-4">
+        <el-col :span="6" v-for="(item, index) in cardData"
+          ><CountCard
+            :title="item.title"
+            :desc="item.desc"
+            :count="item.count"
+            :rate="item.rate"
+            :icon="item.icon"
+            :color="item.color"
+            :trend="item.trend as number"
+          />
+        </el-col>
+      </el-row>
+    </div>
     <el-row :gutter="16" class="mt-4">
       <el-col :span="8"
         ><el-card><PieChart /></el-card
@@ -27,44 +31,120 @@
 </template>
 
 <script setup lang="ts" name="Analysis">
-import CountCard from './components/CountCard.vue'
-import { reactive } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import PieChart from './components/PieChart.vue'
+import CountCard from './components/CountCard.vue'
+import headerFilter from './components/headerFilter.vue'
+import { reqDataOverview } from '~/api/dashboard'
 
-const cardData = [
+// trend 1 上升  2 下降
+const cardData = ref<OverviewItem[]>([
   {
-    title: '访问数',
-    count: 134226,
-    desc: 'visit numbers',
-    rate: '+25.8%',
+    title: '订单数',
+    prop: 'order_cnt',
+    count: 0,
+    desc: '支付订单总数',
+    rate: '',
     icon: 'ep-ice-cream',
     color: 'orange'
   },
   {
-    title: '品牌数',
-    count: 8476,
-    desc: 'download ',
-    rate: '+0.8%',
+    title: '订单金额',
+    prop: 'order_amount',
+    count: 0,
+    desc: '支付订单总金额',
+    rate: '',
     icon: 'ep-lollipop',
     color: 'blue'
   },
   {
-    title: '销售额',
-    count: 134226,
-    desc: 'sales s',
-    rate: '+9.16%',
+    title: '平均客单价',
+    prop: 'avg_order_price',
+    count: 0,
+    desc: '订单总金额/订单总数',
+    rate: '',
     icon: 'ep-coffee-cup',
     color: 'indigo'
   },
   {
-    title: '新用户数',
-    count: 912,
-    desc: 'new visitors',
-    rate: '+5.1%',
+    title: '成交订单数',
+    prop: 'success_order_cnt',
+    count: 0,
+    desc: '剔除退款订单后的订单数',
+    rate: '',
+    icon: 'ep-watermelon',
+    color: 'purple'
+  },
+  {
+    title: '成交金额',
+    prop: 'success_amount',
+    count: 0,
+    desc: '剔除退款订单后的订单金额',
+    rate: '',
+    icon: 'ep-watermelon',
+    color: 'purple'
+  },
+  {
+    title: '退款订单数',
+    prop: 'refund_order_cnt',
+    count: 0,
+    desc: '退款订单总数',
+    rate: '',
+    icon: 'ep-watermelon',
+    color: 'purple'
+  },
+  {
+    title: '退款订单金额',
+    prop: 'refund_amount',
+    count: 0,
+    desc: '退款订单总金额',
+    rate: '',
+    icon: 'ep-watermelon',
+    color: 'purple'
+  },
+  {
+    title: '退款率',
+    prop: 'refund_rate',
+    count: 0,
+    desc: '退款订单总数',
+    rate: '',
     icon: 'ep-watermelon',
     color: 'purple'
   }
-]
+])
+const dataOverviewLoading = ref(false)
+const doHeaderFilterRef = ref()
+// 获取数据概览
+const getDataOverview = async () => {
+  try {
+    dataOverviewLoading.value = true
+    const conditions = doHeaderFilterRef.value.getConditions()
+    const params = {
+      start_date: conditions.date[0],
+      end_date: conditions.date[1]
+    }
+    const res: OverviewDataResponseType = await reqDataOverview(params)
+    if (res.code === 200) {
+      const { data } = res
+      cardData.value.forEach((item) => {
+        item.count =
+          item.prop === 'refund_rate'
+            ? (data[item.prop] * 100).toFixed(2) + '%'
+            : Number(data[item.prop].toFixed(2))
+        item.rate = (data[item.prop + '_growth_rate'] * 100).toFixed(2) + '%'
+        if (item.prop.includes('refund')) {
+          item.trend = data[item.prop + '_growth_rate'] < 0 ? 1 : 2
+        } else {
+          item.trend = data[item.prop + '_growth_rate'] > 0 ? 1 : 2
+        }
+      })
+    }
+  } catch (error) {
+    console.log(error)
+  } finally {
+    dataOverviewLoading.value = false
+  }
+}
 
 const options3 = reactive({
   title: {
@@ -107,5 +187,8 @@ const options4 = reactive({
       type: 'bar'
     }
   ]
+})
+onMounted(() => {
+  getDataOverview()
 })
 </script>
