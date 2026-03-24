@@ -39,3 +39,21 @@ interface OverviewItem {
   color: string
   trend?: number
 }
+
+interface TrendAnalysisData {
+  avg_order_price: number
+  order_amount: number
+  order_cnt: number
+  refund_amount: number
+  refund_order_cnt: number
+  refund_rate: number
+  success_amount: number
+  success_order_cnt: number
+  [property: string]: any
+}
+
+interface TrendAnalysisResponseType extends responseType {
+  data: {
+    [key: string]: TrendAnalysisData
+  }
+}

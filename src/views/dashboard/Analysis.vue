@@ -1,7 +1,10 @@
 <template>
   <div class="container">
     <div>
-      <headerFilter ref="doHeaderFilterRef" @changeFilter="getDataOverview()" />
+      <div class="flex justify-between items-center h-full w-full mb-4">
+        <h1 class="font-bold text-[16px]">数据概览</h1>
+        <HeaderFilter ref="doHeaderFilterRef" @changeFilter="getDataOverview()" />
+      </div>
       <el-row :gutter="16" v-loading="dataOverviewLoading" class="flex gap-y-4">
         <el-col :span="6" v-for="(item, index) in cardData"
           ><CountCard
@@ -16,16 +19,16 @@
         </el-col>
       </el-row>
     </div>
-    <el-row :gutter="16" class="mt-4">
-      <el-col :span="8"
+    <el-row class="mt-4">
+      <!-- <el-col :span="8"
         ><el-card><PieChart /></el-card
-      ></el-col>
-      <el-col :span="8"
-        ><el-card><MyEchart :options="options3" style="height: 300px"></MyEchart></el-card
-      ></el-col>
-      <el-col :span="8"
+      ></el-col> -->
+      <el-col :span="24">
+        <el-card><TrendAanalysis /></el-card>
+      </el-col>
+      <!-- <el-col :span="8"
         ><el-card><MyEchart :options="options4" style="height: 300px"></MyEchart></el-card
-      ></el-col>
+      ></el-col> -->
     </el-row>
   </div>
 </template>
@@ -34,7 +37,8 @@
 import { onMounted, reactive, ref } from 'vue'
 import PieChart from './components/PieChart.vue'
 import CountCard from './components/CountCard.vue'
-import headerFilter from './components/headerFilter.vue'
+import HeaderFilter from './components/headerFilter.vue'
+import TrendAanalysis from './components/TrendAanalysis.vue'
 import { reqDataOverview } from '~/api/dashboard'
 
 // trend 1 上升  2 下降

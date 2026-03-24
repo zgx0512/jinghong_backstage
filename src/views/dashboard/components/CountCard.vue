@@ -22,7 +22,7 @@
     </div>
     <div class="absolute right-2 top-2">
       <el-tooltip :content="desc" effect="light">
-        <el-icon class="text-gray-300"><i-ep-question-filled /></el-icon>
+        <el-icon class="text-gray-300 dark:text-gray-700"><i-ep-question-filled /></el-icon>
       </el-tooltip>
     </div>
     <div
