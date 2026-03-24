@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div>
+  <div class="analysis-container">
+    <div class="data-overview">
       <div class="flex justify-between items-center h-full w-full mb-4">
         <h1 class="font-bold text-[16px]">数据概览</h1>
         <HeaderFilter ref="doHeaderFilterRef" @changeFilter="getDataOverview()" />
@@ -20,25 +20,27 @@
       </el-row>
     </div>
     <el-row class="mt-4">
-      <!-- <el-col :span="8"
-        ><el-card><PieChart /></el-card
-      ></el-col> -->
       <el-col :span="24">
-        <el-card><TrendAanalysis /></el-card>
+        <el-card><TrendAanalysisChart /></el-card>
       </el-col>
       <!-- <el-col :span="8"
         ><el-card><MyEchart :options="options4" style="height: 300px"></MyEchart></el-card
       ></el-col> -->
     </el-row>
+    <el-row class="mt-4">
+      <el-col :span="24">
+        <el-card><CategorySalesChart /></el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script setup lang="ts" name="Analysis">
-import { onMounted, reactive, ref } from 'vue'
-import PieChart from './components/PieChart.vue'
+import { onMounted, ref } from 'vue'
 import CountCard from './components/CountCard.vue'
 import HeaderFilter from './components/headerFilter.vue'
-import TrendAanalysis from './components/TrendAanalysis.vue'
+import TrendAanalysisChart from './components/TrendAanalysisChart.vue'
+import CategorySalesChart from './components/CategorySalesChart.vue'
 import { reqDataOverview } from '~/api/dashboard'
 
 // trend 1 上升  2 下降
@@ -149,50 +151,17 @@ const getDataOverview = async () => {
     dataOverviewLoading.value = false
   }
 }
-
-const options3 = reactive({
-  title: {
-    text: '访问趋势',
-    left: 'left'
-  },
-  xAxis: {
-    type: 'category',
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  },
-  yAxis: {
-    type: 'value'
-  },
-  series: [
-    {
-      data: [150, 230, 224, 218, 135, 147, 260],
-      type: 'line'
-    }
-  ]
-})
-
-const options4 = reactive({
-  title: {
-    text: '访问趋势',
-    left: 'left'
-  },
-  xAxis: {
-    type: 'category',
-    data: ['用户数', '订单数', '商品数', '品牌数']
-  },
-  yAxis: {
-    type: 'value',
-    axisLine: {
-      show: true
-    }
-  },
-  series: [
-    {
-      data: [50, 260, 150, 40],
-      type: 'bar'
-    }
-  ]
-})
 onMounted(() => {
   getDataOverview()
 })
 </script>
+<style lang="scss" scoped>
+.analysis-container {
+  padding: 10px;
+  .data-overview {
+    border: 1px solid var(--el-border-color-light);
+    padding: 16px;
+    border-radius: 4px;
+  }
+}
+</style>

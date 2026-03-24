@@ -57,3 +57,14 @@ interface TrendAnalysisResponseType extends responseType {
     [key: string]: TrendAnalysisData
   }
 }
+
+interface CategorySales {
+  category: number
+  category_name: string
+  order_cnt: number
+  [property: string]: any
+}
+
+interface CategorySalesResponseType extends responseType {
+  data: CategorySales[]
+}

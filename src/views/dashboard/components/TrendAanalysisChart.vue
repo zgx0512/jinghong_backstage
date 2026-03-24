@@ -35,7 +35,8 @@
         />
       </el-select>
     </div>
-    <MyEchart style="height: 400px" v-loading="loading" :options="options" />
+    <MyEchart v-if="Object.keys(trendAanalysisData).length > 0" style="height: 400px" v-loading="loading" :options="options" />
+    <div v-else class="w-[100%] h-[400px] flex items-center justify-center">暂无数据</div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -98,7 +99,6 @@ const options = ref({
       type: 'line' // 指示器类型
     },
     formatter: function (params: any) {
-      console.log('params', params)
       // 自定义提示框内容
       let result = params[0].axisValue + '<br/>' // 显示X轴的值
       params.forEach((param: any) => {

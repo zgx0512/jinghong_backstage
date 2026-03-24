@@ -9,3 +9,8 @@ export const reqDataOverview = (params: { start_date: string; end_date: string }
 export const reqTrendAnalysis = (params: { start_date: string; end_date: string }) => {
   return request.get<TrendAnalysisResponseType, any>('/getTrendAnalysis', { params })
 }
+
+// 商品类目销售分布
+export const reqCategorySales = (params: { start_date: string; end_date: string }) => {
+  return request.get<CategorySalesResponseType, any>('/getCategorySales', { params })
+}
