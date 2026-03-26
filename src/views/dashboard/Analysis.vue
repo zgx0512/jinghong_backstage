@@ -24,12 +24,12 @@
         <el-card><TrendAanalysisChart /></el-card>
       </el-col>
     </el-row>
+    <RealTimeMonitor class="mt-4" />
     <el-row class="mt-4">
       <el-col :span="24">
         <el-card><CategorySalesChart /></el-card>
       </el-col>
     </el-row>
-    <RealTimeMonitor class="mt-4" />
   </div>
 </template>
 
