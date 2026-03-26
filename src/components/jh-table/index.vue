@@ -13,7 +13,7 @@
       <el-table-column type="selection" width="55" v-if="props.tableProp.isSelect" align="center" />
       <el-table-column
         type="index"
-        :label="props.tableProp.isZh ? '序号' : '#'"
+        :label="props.tableProp.isZh ? tableProp.title : '#'"
         :width="props.tableProp.isZh ? '80' : '55'"
         align="center"
         v-if="props.tableProp.index"
@@ -75,7 +75,8 @@ const props = withDefaults(
     tableProp: () => ({
       isSelect: false,
       index: false,
-      isZh: false
+      isZh: false,
+      title: '序号'
     }),
     showPagination: true,
     page_info: () => ({
@@ -122,13 +123,16 @@ const handleHeaderDragEnd = (newWidth: number, oldWidth: number, column: any) =>
 </script>
 
 <style lang="scss" scoped>
-.jh-table-container {
-  // margin: 0 10px 10px 10px;
-}
 .jh-table {
   margin: 10px 0;
   font-size: 13px;
-  border-bottom: 1px solid var(--el-table-border-color);
+  border-bottom: 1px solid var(--el-border-color);
+  :deep(.el-table__header-wrapper) {
+    .el-table__cell {
+      background-color: var(--el-fill-color);
+      color: var(--el-text-color-primary);
+    }
+  }
   :deep(.el-table__body-wrapper) {
     .el-scrollbar {
       min-height: 350px;

@@ -14,3 +14,8 @@ export const reqTrendAnalysis = (params: { start_date: string; end_date: string 
 export const reqCategorySales = (params: { start_date: string; end_date: string }) => {
   return request.get<CategorySalesResponseType, any>('/getCategorySales', { params })
 }
+
+// 实时数据监控
+export const reqRealTimeData = () => {
+  return request.get<RealTimeDataResponseType, any>('/getRealTimeData')
+}

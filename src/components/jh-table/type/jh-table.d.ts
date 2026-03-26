@@ -16,6 +16,7 @@ interface JHTablePropType {
   isSelect?: boolean
   index?: boolean
   isZh?: boolean
+  title?: string
 }
 
 interface JHTablePageInfoType {

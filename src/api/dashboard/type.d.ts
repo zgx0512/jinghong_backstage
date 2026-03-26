@@ -68,3 +68,33 @@ interface CategorySales {
 interface CategorySalesResponseType extends responseType {
   data: CategorySales[]
 }
+
+interface RealTimeData {
+  avg_order_price_ratio: number
+  order_amount_ratio: number
+  order_ratio: number
+  orderProductData: OrderProductDatum[]
+  refund_amount_ratio: number
+  refund_order_ratio: number
+  refund_rate_ratio: number
+  today_avg_order_price: number
+  today_order_amount: number
+  today_order_cnt: number
+  today_refund_amount: number
+  today_refund_order_cnt: number
+  today_refund_rate: number
+  [property: string]: any
+}
+
+interface OrderProductDatum {
+  goods_id: number
+  goods_name: string
+  goods_num: number
+  sales_growth_rate: number
+  yesterday_goods_num: number
+  [property: string]: any
+}
+
+interface RealTimeDataResponseType extends responseType {
+  data: RealTimeData
+}

@@ -23,15 +23,13 @@
       <el-col :span="24">
         <el-card><TrendAanalysisChart /></el-card>
       </el-col>
-      <!-- <el-col :span="8"
-        ><el-card><MyEchart :options="options4" style="height: 300px"></MyEchart></el-card
-      ></el-col> -->
     </el-row>
     <el-row class="mt-4">
       <el-col :span="24">
         <el-card><CategorySalesChart /></el-card>
       </el-col>
     </el-row>
+    <RealTimeMonitor class="mt-4" />
   </div>
 </template>
 
@@ -41,6 +39,7 @@ import CountCard from './components/CountCard.vue'
 import HeaderFilter from './components/headerFilter.vue'
 import TrendAanalysisChart from './components/TrendAanalysisChart.vue'
 import CategorySalesChart from './components/CategorySalesChart.vue'
+import RealTimeMonitor from './components/RealTimeMonitor.vue'
 import { reqDataOverview } from '~/api/dashboard'
 
 // trend 1 上升  2 下降
