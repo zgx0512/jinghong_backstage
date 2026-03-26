@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
   }
 }
 :deep(.jh-table) {
-  min-width: 436px;
+  min-width: 460px;
   .trend {
     display: block;
     border: 1px solid var(--el-border-color);
