@@ -161,11 +161,11 @@ const getRealTimeData = async () => {
       realTimeData.value.forEach((item) => {
         item.value = res.data[item.prop]
         if (item.prop === 'today_refund_rate') {
-          item.value = (res.data[item.prop] * 100).toFixed(2) + '%'
+          item.value = (res.data[item.prop] * 100)?.toFixed(2) + '%'
         } else {
           item.value = formatThousandSeparator(item.value)
         }
-        item.rate = res.data[item.rate_prop].toFixed(2) + '%'
+        item.rate = res.data[item.rate_prop]?.toFixed(2) + '%'
         if (item.prop.includes('refund')) {
           item.trend = res.data[item.rate_prop] > 0 ? 0 : 1
         } else {
