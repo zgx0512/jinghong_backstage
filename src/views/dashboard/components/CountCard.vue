@@ -74,6 +74,6 @@ const textColors = {
 
 <style lang="scss" scoped>
 .count-card {
-  background-color: var(--el-bg-color-overlay);
+  background-color: var(--el-bg-color);
 }
 </style>

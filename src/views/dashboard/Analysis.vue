@@ -59,8 +59,8 @@ const cardData = ref<OverviewItem[]>([
     count: 0,
     desc: '支付订单总金额',
     rate: '',
-    icon: 'ep-lollipop',
-    color: 'blue'
+    icon: 'ep-ice-cream',
+    color: 'orange'
   },
   {
     title: '平均客单价',
@@ -69,7 +69,7 @@ const cardData = ref<OverviewItem[]>([
     desc: '订单总金额/订单总数',
     rate: '',
     icon: 'ep-coffee-cup',
-    color: 'indigo'
+    color: 'blue'
   },
   {
     title: '成交订单数',
@@ -77,8 +77,8 @@ const cardData = ref<OverviewItem[]>([
     count: 0,
     desc: '剔除退款订单后的订单数',
     rate: '',
-    icon: 'ep-watermelon',
-    color: 'purple'
+    icon: 'ep-coin',
+    color: 'indigo'
   },
   {
     title: '成交金额',
@@ -86,8 +86,8 @@ const cardData = ref<OverviewItem[]>([
     count: 0,
     desc: '剔除退款订单后的订单金额',
     rate: '',
-    icon: 'ep-watermelon',
-    color: 'purple'
+    icon: 'ep-coin',
+    color: 'indigo'
   },
   {
     title: '退款订单数',

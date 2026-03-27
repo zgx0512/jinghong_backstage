@@ -46,6 +46,7 @@ router.beforeEach(async (to, from, next) => {
           return undefined
         }
         const hasRouter = getDefaultRoute(router.options.routes as RouteRecordRaw[])
+        console.log("hasRouter", hasRouter)
         if (to.path === '/') {
           next(userStore.defaultRoute)
         } else if (!hasRouter) {
