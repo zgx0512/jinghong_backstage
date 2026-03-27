@@ -2,7 +2,6 @@ import router from '~/router'
 import { useUserStore } from '~/store/user'
 import pinia from '~/store'
 import { clearToken } from '~/utils/token'
-import { RouteRecordRaw } from 'vue-router'
 
 // 实例化路由对象
 const userStore = useUserStore(pinia)
@@ -28,25 +27,13 @@ router.beforeEach(async (to, from, next) => {
           next('/login')
         }
       } else {
-        const getDefaultRoute = (routes: RouteRecordRaw[]): RouteRecordRaw | undefined => {
-          for (const route of routes) {
-            // 先判断自己
-            if ((route.name as string).toLowerCase() === (to.name as string)!.toLowerCase()) {
-              return route
-            }
-            // 再递归子路由
-            if (route.children && route.children.length > 0) {
-              const found = getDefaultRoute(route.children)
-              if (found) {
-                return found
-              }
-            }
+        const hasRouter = (() => {
+          if (typeof to.name === 'string' && router.hasRoute(to.name)) {
+            return true
           }
+          return router.getRoutes().some((route) => route.path === to.path)
+        })()
 
-          return undefined
-        }
-        const hasRouter = getDefaultRoute(router.options.routes as RouteRecordRaw[])
-        console.log("hasRouter", hasRouter)
         if (to.path === '/') {
           next(userStore.defaultRoute)
         } else if (!hasRouter) {

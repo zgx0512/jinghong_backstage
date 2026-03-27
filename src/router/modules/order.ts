@@ -28,7 +28,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'order-detail',
-        name: 'order-detail',
+        name: 'orderDetail',
         component: () =>
           import(/* webpackChunkName: "order" */ '~/views/order/order-detail/index.vue'),
         hidden: true,

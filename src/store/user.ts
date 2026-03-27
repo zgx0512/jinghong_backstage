@@ -140,6 +140,16 @@ export const useUserStore = defineStore('userStore', () => {
       } else {
         router.push({ path: '/403' })
       }
+      const findOrderIndex = router.options.routes.findIndex((item) => item.name === 'order')
+      if (findOrderIndex !== -1) {
+        router.addRoute('order', {
+          path: 'order-detail',
+          name: 'orderDetail',
+          component: () => import('~/views/order/order-detail/index.vue'),
+          hidden: true,
+          meta: { title: '订单详情' }
+        })
+      }
       return 'ok'
     }
     return Promise.reject(new Error(''))
