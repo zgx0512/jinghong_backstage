@@ -21,7 +21,7 @@ const __APP_INFO__ = {
 
 export default ({ mode }) => {
   return defineConfig({
-    base: './',
+    base: '/',
     server: {
       host: '0.0.0.0',
       port: 9527,
